@@ -1,0 +1,67 @@
+<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Zyon ERP</title>
+  <link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-header">⚡Z Zyon ERP</div>
+      <ul class="nav-list">
+        <li><a href="dashboard.html" class="active">📊 Dashboard</a></li>
+        <li><a href="clientes.html">📋 Cadastros</a></li>
+        <li><a href="#">🛒 Vendas</a></li>
+        <li><a href="#">📦 Estoque</a></li>
+        <li><a href="#">📄 Fiscal</a></li>
+        <li><a href="#">📈 Relatórios</a></li>
+        <li><a href="#">⚙️ Configurações</a></li>
+        <li><a href="login.html" class="logout">🚪 Sair</a></li>
+      </ul>
+    </nav>
+    <main class="main-content">
+      <header class="topbar">
+        <span class="app-title">Zyon ERP</span>
+        <span id="clock"></span>
+        <span class="settings-icon">⚙️</span>
+      </header>
+      <section class="kpi-cards">
+        <div class="card card-blue"><h3>Vendas Hoje</h3><p>R$ 12.340,00</p></div>
+        <div class="card card-green"><h3>Ticket Médio</h3><p>R$ 189,50</p></div>
+        <div class="card card-yellow"><h3>Estoque Baixo</h3><p>23 itens</p></div>
+        <div class="card card-purple"><h3>Clientes</h3><p>1.234</p></div>
+      </section>
+      <section class="table-section">
+        <h2>Últimas Vendas</h2>
+        <table>
+          <tr><th>Cliente</th><th>Valor</th><th>Data</th></tr>
+          <tr><td>João Silva</td><td>R$ 320,00</td><td>15/10/2023</td></tr>
+          <tr><td>Maria Oliveira</td><td>R$ 150,00</td><td>15/10/2023</td></tr>
+          <tr><td>Carlos Souza</td><td>R$ 2.100,00</td><td>14/10/2023</td></tr>
+        </table>
+      </section>
+      <button class="btn-primary" onclick="openModal('clienteModal')">+ Novo Cliente</button>
+    </main>
+  </div>
+  <div id="clienteModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('clienteModal')">&times;</span>
+      <h2>Adicionar Cliente</h2>
+      <p>Modal placeholder - redirecione para adicionar-cliente.html</p>
+      <button onclick="window.location.href='adicionar-cliente.html'">Ir para formulário</button>
+    </div>
+  </div>
+  <script>
+    function updateClock() {
+      document.getElementById('clock').innerText = new Date().toLocaleString('pt-BR');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+  </script>
+</body>
+</html>

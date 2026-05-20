@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDV - Zyon ERP</title>
+    <link rel="stylesheet" href="style/style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            height: 100vh;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 {
+            margin-bottom: 30px;
+        }
+        .sidebar nav a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 10px 0;
+            border-bottom: 1px solid #34495e;
+        }
+        .sidebar nav a:hover {
+            background-color: #34495e;
+        }
+        /* Header */
+        .header {
+            background-color: #2980b9;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 24px;
+        }
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-area {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #2980b9;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #2980b9;
+            color: white;
+        }
+        .summary {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        .summary div {
+            margin-bottom: 5px;
+        }
+        .summary .total {
+            font-size: 24px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+        }
+        .btn-green { background-color: #27ae60; }
+        .btn-red { background-color: #e74c3c; }
+        .btn-orange { background-color: #f39c12; }
+        .btn-purple { background-color: #8e44ad; }
+        .btn-blue { background-color: #2980b9; }
+        .btn:hover { opacity: 0.9; }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            display: flex;
+            background-color: white;
+            width: 80%;
+            max-width: 1200px;
+            height: 80%;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .modal-left, .modal-right {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .modal-left {
+            background-color: #ecf0f1;
+        }
+        .modal-right {
+            background-color: white;
+        }
+        .modal-left h2, .modal-right h2 {
+            margin-bottom: 20px;
+        }
+        .payment-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .payment-buttons .btn {
+            padding: 15px;
+            font-size: 16px;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .item-list, .payment-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        .item-list li, .payment-list li {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .payment-list li {
+            display: flex;
+            justify-content: space-between;
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .modal-content { flex-direction: column; width: 95%; height: 95%; }
+            .modal-left, .modal-right { flex: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Zyon ERP</h2>
+        <nav>
+            <a href="#">Dashboard</a>
+            <a href="#">Vendas</a>
+            <a href="#">Produtos</a>
+            <a href="#">Clientes</a>
+            <a href="#">Relatórios</a>
+        </nav>
+    </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>PDV - Ponto de Venda</h1>
+            <div>Usuário: Admin</div>
+        </div>
+        <div class="main-area">
+            <!-- Selectors and input -->
+            <div class="row">
+                <div class="form-group">
+                    <label for="seller">Vendedor</label>
+                    <select id="seller">
+                        <option>Vendedor Padrão</option>
+                        <option>Vendedor 1</option>
+                        <option>Vendedor 2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="customer">Cliente</label>
+                    <select id="customer">
+                        <option>Consumidor Final</option>
+                        <option>Cliente A</option>
+                        <option>Cliente B</option>
+                    </select>
+                </div>
+            </div>
+            <input type="text" class="search-input" id="barcode" placeholder="Código de barras ou nome do produto" onkeydown="if(event.key==='Enter') addItem()">
+            <!-- Items Table -->
+            <table id="items-table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Valor Unitário</th>
+                        <th>Total</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="items-body">
+                    <!-- Items will be added here -->
+                </tbody>
+            </table>
+            <!-- Summary -->
+            <div class="summary">
+                <div>Subtotal: <span id="subtotal">R$ 0,00</span></div>
+                <div>Desconto: <span id="discount">R$ 0,00</span></div>
+                <div>Acréscimo: <span id="surcharge">R$ 0,00</span></div>
+                <div class="total">TOTAL: <span id="total">R$ 0,00</span></div>
+            </div>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-orange" accesskey="4" onclick="alert('Acréscimo')">ACRÉSCIMO (F4)</button>
+                <button class="btn btn-purple" accesskey="5" onclick="alert('Desconto')">DESCONTO (F5)</button>
+                <button class="btn btn-red" accesskey="9" onclick="clearSale()">CANCELAR (F9)</button>
+                <button class="btn btn-blue" accesskey="8" onclick="alert('Operações')">OPERAÇÕES (F8)</button>
+                <button class="btn btn-green" accesskey="2" onclick="openModal()">FINALIZAR (F12)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-left">
+                <div class="modal-header">
+                    <h2>Checkout</h2>
+                    <span class="close" onclick="closeModal()">&times;</span>
+                </div>
+                <p><strong>Cliente:</strong> <span id="modal-customer">Consumidor Final</span></p>
+                <h3>FALTA PAGAR: <span id="due-amount">R$ 150,50</span></h3>
+                <h3>Total: <span id="modal-total">R$ 150,50</span></h3>
+                <div class="payment-buttons">
+                    <button class="btn btn-blue" onclick="addPayment('Dinheiro')">Dinheiro</button>
+                    <button class="btn btn-blue" onclick="addPayment('PIX')">PIX</button>
+                    <button class="btn btn-blue" onclick="addPayment('Débito')">Débito</button>
+                    <button class="btn btn-blue" onclick="addPayment('Crédito')">Crédito</button>
+                    <button class="btn btn-blue" onclick="addPayment('Outras Formas')">Outras Formas</button>
+                </div>
+                <button class="btn btn-green" style="width:100%;" onclick="alert('Venda finalizada!')">FINALIZAR VENDA</button>
+            </div>
+            <div class="modal-right">
+                <h2>Itens da Venda</h2>
+                <ul class="item-list" id="modal-item-list">
+                    <li>Produto Exemplo - Qtde: 1 - R$ 100,00</li>
+                    <li>Produto Exemplo 2 - Qtde: 2 - R$ 50,50</li>
+                </ul>
+                <h2>PAGAMENTOS LANÇADOS</h2>
+                <ul class="payment-list" id="payment-list">
+                    <!-- Payments added here -->
+                </ul>
+                <p><strong>Total Pago:</strong> <span id="total-paid">R$ 0,00</span></p>
+                <p><strong>TROCO TOTAL:</strong> <span id="change">R$ 0,00</span></p>
+                <div style="margin-top:20px;">
+                    <button class="btn btn-blue">NFC-e</button>
+                    <button class="btn btn-blue">NF-e</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        let items = [];
+        let payments = [];
+        let discount = 0;
+        let surcharge = 0;
+
+        function addItem() {
+            const input = document.getElementById('barcode');
+            const product = input.value.trim();
+            if (!product) return;
+            // Simulate adding a product
+            items.push({ name: product, qty: 1, price: Math.random() * 100 + 10 });
+            input.value = '';
+            renderItems();
+            updateTotals();
+        }
+
+        function removeItem(index) {
+            items.splice(index, 1);
+            renderItems();
+            updateTotals();
+        }
+
+        function renderItems() {
+            const tbody = document.getElementById('items-body');
+            tbody.innerHTML = '';
+            items.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.qty}</td>
+                    <td>R$ ${item.price.toFixed(2)}</td>
+                    <td>R$ ${(item.qty * item.price).toFixed(2)}</td>
+                    <td><button onclick="removeItem(${index})" style="color:red;">X</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateTotals() {
+            const subtotal = items.reduce((sum, item) => sum + item.qty * item.price, 0);
+            const total = subtotal + surcharge - discount;
+            document.getElementById('subtotal').innerText = `R$ ${subtotal.toFixed(2)}`;
+            document.getElementById('discount').innerText = `R$ ${discount.toFixed(2)}`;
+            document.getElementById('surcharge').innerText = `R$ ${surcharge.toFixed(2)}`;
+            document.getElementById('total').innerText = `R$ ${total.toFixed(2)}`;
+            // Also update modal totals
+            document.getElementById('due-amount').innerText = `R$ ${total.toFixed(2)}`;
+            document.getElementById('modal-total').innerText = `R$ ${total.toFixed(2)}`;
+        }
+
+        function clearSale() {
+            items = [];
+            discount = 0;
+            surcharge = 0;
+            renderItems();
+            updateTotals();
+        }
+
+        function openModal() {
+            document.getElementById('checkoutModal').style.display = 'flex';
+            // Populate modal item list
+            const itemList = document.getElementById('modal-item-list');
+            itemList.innerHTML = '';
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.innerText = `${item.name} - Qtde: ${item.qty} - R$ ${(item.qty * item.price).toFixed(2)}`;
+                itemList.appendChild(li);
+            });
+            updateTotals();
+        }
+
+        function closeModal() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        }
+
+        function addPayment(method) {
+            const total = items.reduce((sum, item) => sum + item.qty * item.price, 0) + surcharge - discount;
+            const paid = document.getElementById('total-paid');
+            let currentPaid = parseFloat(paid.innerText.replace('R$ ', '').replace(',', '.'));
+            if (isNaN(currentPaid)) currentPaid = 0;
+            // Simulate payment of full due amount (you can improve)
+            const remaining = total - currentPaid;
+            if (remaining <= 0) {
+                alert('Valor já totalmente pago.');
+                return;
+            }
+            const paymentAmount = remaining; // for simplicity, pay full due
+            payments.push({ method, amount: paymentAmount });
+            currentPaid += paymentAmount;
+            paid.innerText = `R$ ${currentPaid.toFixed(2)}`;
+            const change = currentPaid - total;
+            document.getElementById('change').innerText = `R$ ${change >= 0 ? change.toFixed(2) : '0.00'}`;
+            // Update payment list
+            const paymentList = document.getElementById('payment-list');
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${method}</span><span>R$ ${paymentAmount.toFixed(2)}</span>`;
+            paymentList.appendChild(li);
+            // Update due amount
+            const due = total - currentPaid;
+            document.getElementById('due-amount').innerText = `R$ ${due > 0 ? due.toFixed(2) : '0.00'}`;
+        }
+
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('checkoutModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
