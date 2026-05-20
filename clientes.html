@@ -1,20 +1,95 @@
-<!-- clientes.html -->
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clientes - Zyon ERP</title>
   <link rel="stylesheet" href="style/style.css">
+  <style>
+    /* Estilos específicos para melhorar a tela de Clientes */
+    .search-container {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 2rem;
+        align-items: center;
+    }
+    .search-input-wrapper {
+        flex: 1;
+        position: relative;
+    }
+    .search-input-wrapper input {
+        width: 100%;
+        padding: 0.9rem 1rem 0.9rem 2.5rem; /* Espaço extra à esquerda para a lupa */
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color var(--transition);
+        color: var(--text-dark);
+        background: var(--white);
+    }
+    .search-input-wrapper input:focus {
+        border-color: var(--royal);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+    
+    /* Estilo para a Tabela parecer um Cartão (Card) */
+    .table-card {
+        background: var(--white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+    .table-card th {
+        padding: 1.2rem 1.5rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    .table-card td {
+        padding: 1.2rem 1.5rem;
+        vertical-align: middle;
+    }
+
+    /* Crachá (Badge) de Status */
+    .status-badge {
+        background-color: #d1fae5;
+        color: #065f46;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    /* Ações (Ícones) */
+    .action-btns span {
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 6px;
+        transition: background 0.2s;
+        margin-right: 5px;
+    }
+    .action-btns span:hover {
+        background: var(--gray-bg);
+    }
+  </style>
 </head>
 <body>
   <div class="layout">
     <nav class="sidebar">
-      <div class="sidebar-header">⚡Z Zyon ERP</div>
+      <div class="sidebar-header">Zyon ERP</div>
       <ul class="nav-list">
         <li><a href="dashboard.html">📊 Dashboard</a></li>
         <li><a href="clientes.html" class="active">📋 Cadastros</a></li>
-        <li><a href="#">🛒 Vendas</a></li>
+        <li><a href="vendas.html">🛒 Vendas</a></li>
         <li><a href="#">📦 Estoque</a></li>
         <li><a href="#">📄 Fiscal</a></li>
         <li><a href="#">📈 Relatórios</a></li>
@@ -22,38 +97,77 @@
         <li><a href="login.html" class="logout">🚪 Sair</a></li>
       </ul>
     </nav>
+
     <main class="main-content">
       <header class="topbar">
-        <span class="app-title">Zyon ERP</span>
-        <span id="clock"></span>
-        <span class="settings-icon">⚙️</span>
+        <span class="app-title" style="font-size: 1.5rem; font-weight: bold; color: var(--navy);">Zyon ERP</span>
+        <span id="clock" style="color: var(--text-light); font-weight: 500;"></span>
       </header>
-      <div class="page-header">
-        <h1>Clientes</h1>
+
+      <div class="page-header" style="margin-bottom: 1.5rem;">
+        <h1 style="color: var(--navy); font-size: 2rem;">Clientes</h1>
         <button class="btn-primary" onclick="window.location.href='adicionar-cliente.html'">+ Novo Cliente</button>
       </div>
-      <div class="search-bar">
-        <input type="text" placeholder="Buscar cliente...">
-        <button class="btn-secondary">Limpar</button>
+
+      <div class="search-container">
+        <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Buscar por nome, email ou documento...">
+        </div>
+        <button class="btn-secondary" style="padding: 0.9rem 2rem;">Limpar</button>
       </div>
-      <table>
-        <tr><th>Cliente/Contato</th><th>CPF/CNPJ</th><th>Status</th><th>Ações</th></tr>
-        <tr>
-          <td>Consumidor Final</td>
-          <td>000.000.000-00</td>
-          <td>Ativo</td>
-          <td>
-            <span class="action-icon">👁️</span>
-            <span class="action-icon">✏️</span>
-            <span class="action-icon">🚫</span>
-          </td>
-        </tr>
-      </table>
+
+      <div class="table-card">
+          <table>
+            <thead>
+                <tr>
+                    <th>CLIENTE / CONTATO</th>
+                    <th>CPF / CNPJ</th>
+                    <th>STATUS E AÇÕES</th>
+                    <th>OPÇÕES</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                  <td>
+                    <strong style="color: var(--text-dark); display: block; font-size: 1rem;">Consumidor Final</strong>
+                    <span style="font-size: 0.85rem; color: var(--text-light);">CF</span>
+                  </td>
+                  <td style="color: var(--text-light);">000.000.000-00</td>
+                  <td>
+                      <span class="status-badge">Ativo</span>
+                  </td>
+                  <td class="action-btns">
+                    <span title="Visualizar">👁️</span>
+                    <span title="Editar">✏️</span>
+                    <span title="Inativar">🚫</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong style="color: var(--text-dark); display: block; font-size: 1rem;">João Silva</strong>
+                    <span style="font-size: 0.85rem; color: var(--text-light);">joao.silva@email.com</span>
+                  </td>
+                  <td style="color: var(--text-light);">123.456.789-00</td>
+                  <td>
+                      <span class="status-badge">Ativo</span>
+                  </td>
+                  <td class="action-btns">
+                    <span title="Visualizar">👁️</span>
+                    <span title="Editar">✏️</span>
+                    <span title="Inativar">🚫</span>
+                  </td>
+                </tr>
+            </tbody>
+          </table>
+      </div>
     </main>
   </div>
+
   <script>
     function updateClock() {
-      document.getElementById('clock').innerText = new Date().toLocaleString('pt-BR');
+      const now = new Date();
+      document.getElementById('clock').innerText = now.toLocaleDateString('pt-PT') + ', ' + now.toLocaleTimeString('pt-PT');
     }
     setInterval(updateClock, 1000);
     updateClock();

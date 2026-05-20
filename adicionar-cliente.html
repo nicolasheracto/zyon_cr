@@ -1,6 +1,5 @@
-<!-- adicionar-cliente.html -->
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +13,7 @@
       <ul class="nav-list">
         <li><a href="dashboard.html">📊 Dashboard</a></li>
         <li><a href="clientes.html" class="active">📋 Cadastros</a></li>
-        <li><a href="#">🛒 Vendas</a></li>
+        <li><a href="vendas.html">🛒 Vendas</a></li>
         <li><a href="#">📦 Estoque</a></li>
         <li><a href="#">📄 Fiscal</a></li>
         <li><a href="#">📈 Relatórios</a></li>
@@ -22,98 +21,117 @@
         <li><a href="login.html" class="logout">🚪 Sair</a></li>
       </ul>
     </nav>
+
     <main class="main-content">
       <header class="topbar">
-        <span class="app-title">Zyon ERP</span>
-        <span id="clock"></span>
-        <span class="settings-icon">⚙️</span>
+        <span class="app-title" style="font-size: 1.5rem; font-weight: bold; color: var(--navy);">Zyon ERP</span>
+        <span id="clock" style="color: var(--text-light); font-weight: 500;"></span>
       </header>
+
       <div class="page-header">
         <h1>Clientes</h1>
         <button class="btn-primary" onclick="window.location.href='clientes.html'">Voltar</button>
       </div>
+
       <table>
         <tr><th>Cliente/Contato</th><th>CPF/CNPJ</th><th>Status</th><th>Ações</th></tr>
         <tr>
           <td>Consumidor Final</td>
           <td>000.000.000-00</td>
-          <td>Ativo</td>
+          <td><span style="color: var(--green); font-weight: 500;">Ativo</span></td>
           <td>
-            <span class="action-icon">👁️</span>
-            <span class="action-icon">✏️</span>
-            <span class="action-icon">🚫</span>
+            <span style="cursor:pointer; margin-right:8px;">👁️</span>
+            <span style="cursor:pointer; margin-right:8px;">✏️</span>
+            <span style="cursor:pointer;">🚫</span>
           </td>
         </tr>
       </table>
-      <div class="modal" style="display:flex;">
-        <div class="modal-content">
-          <h2>Adicionar Cliente</h2>
-          <div class="tabs">
-            <button class="tab active">Dados</button>
-            <button class="tab">Contato</button>
-            <button class="tab">Endereço</button>
-            <button class="tab">Adicionais</button>
+    </main>
+
+    <div class="modal" style="display:flex;">
+      <div class="modal-content" style="max-width: 850px; max-height: 90vh; overflow-y: auto;">
+        
+        <div class="tabs">
+          <button class="tab active">Dados</button>
+          <button class="tab">Contato</button>
+          <button class="tab">Endereço</button>
+          <button class="tab">Adicionais</button>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 2rem;">
+          <button type="button" class="btn-primary" style="flex:1; display:flex; justify-content:center; gap:8px;">
+            <span>👤</span> Pessoa Física
+          </button>
+          <button type="button" class="btn-secondary" style="flex:1; background:transparent; display:flex; justify-content:center; gap:8px; border: 1px solid var(--border); color: var(--text-light);">
+            <span>🏢</span> Pessoa Jurídica
+          </button>
+        </div>
+
+        <form>
+          <div class="form-group">
+            <label for="nome">Nome / Razão Social *</label>
+            <input type="text" id="nome" placeholder="Ex: João Silva">
+            <span style="font-size: 0.8rem; color: var(--text-light); margin-top: 4px; display: block;">Informe o nome do cliente.</span>
           </div>
-          <div class="toggle-group">
-            <label>Pessoa Física</label>
-            <input type="radio" name="tipo" checked>
-            <label>Jurídica</label>
-            <input type="radio" name="tipo">
-          </div>
-          <form>
-            <div class="form-group error">
-              <label for="nome">Nome</label>
-              <input type="text" id="nome" value="">
-              <span class="error-msg">Campo obrigatório</span>
-            </div>
-            <div class="form-group">
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
               <label for="cpf">CPF</label>
-              <input type="text" id="cpf">
+              <input type="text" id="cpf" placeholder="000.000.000-00">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
               <label for="rg">RG</label>
-              <input type="text" id="rg">
+              <input type="text" id="rg" placeholder="00.000.000-0">
             </div>
-            <div class="form-group">
-              <label for="orgao">Órgão Exp</label>
-              <input type="text" id="orgao">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="orgao">Órgão Exp.</label>
+              <input type="text" id="orgao" placeholder="SSP">
             </div>
-            <div class="form-group">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
               <label for="nacionalidade">Nacionalidade</label>
-              <input type="text" id="nacionalidade">
+              <input type="text" id="nacionalidade" placeholder="Brasileira">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
               <label for="naturalidade">Naturalidade</label>
-              <input type="text" id="naturalidade">
+              <input type="text" id="naturalidade" placeholder="Cidade">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
               <label for="estado">Estado</label>
               <input type="text" id="estado">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
               <label for="nascimento">Nascimento</label>
-              <input type="date" id="nascimento">
+              <input type="date" id="nascimento" style="color: var(--text-light);">
             </div>
-            <div class="form-group">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group" style="margin-bottom: 0;">
               <label for="pai">Nome do Pai</label>
-              <input type="text" id="pai">
+              <input type="text" id="pai" placeholder="Opcional">
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 0;">
               <label for="mae">Nome da Mãe</label>
-              <input type="text" id="mae">
+              <input type="text" id="mae" placeholder="Opcional">
             </div>
-            <div class="modal-actions">
-              <button type="button" class="btn-secondary" onclick="window.location.href='clientes.html'">Cancelar</button>
-              <button type="submit" class="btn-primary">Salvar Cliente</button>
-            </div>
-          </form>
-        </div>
+          </div>
+
+          <div class="modal-actions" style="margin-top: 2.5rem; display: flex; justify-content: center; gap: 15px;">
+            <button type="button" class="btn-secondary" style="background: transparent; border: none; font-weight: bold; color: var(--text-light);" onclick="window.location.href='clientes.html'">Cancelar</button>
+            <button type="button" class="btn-primary" style="padding: 0.8rem 4rem; font-size: 1rem;" onclick="window.location.href='clientes.html'">Salvar Cliente</button>
+          </div>
+        </form>
       </div>
-    </main>
+    </div>
   </div>
+
   <script>
     function updateClock() {
-      document.getElementById('clock').innerText = new Date().toLocaleString('pt-BR');
+      const now = new Date();
+      document.getElementById('clock').innerText = now.toLocaleDateString('pt-PT') + ' ' + now.toLocaleTimeString('pt-PT');
     }
     setInterval(updateClock, 1000);
     updateClock();

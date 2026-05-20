@@ -10,11 +10,11 @@
 <body>
   <div class="layout">
     <nav class="sidebar">
-      <div class="sidebar-header">⚡Z Zyon ERP</div>
+      <div class="sidebar-header">Zyon ERP</div>
       <ul class="nav-list">
         <li><a href="dashboard.html" class="active">📊 Dashboard</a></li>
         <li><a href="clientes.html">📋 Cadastros</a></li>
-        <li><a href="#">🛒 Vendas</a></li>
+        <li><a href="vendas.html">🛒 Vendas</a></li>
         <li><a href="#">📦 Estoque</a></li>
         <li><a href="#">📄 Fiscal</a></li>
         <li><a href="#">📈 Relatórios</a></li>
@@ -43,16 +43,8 @@
           <tr><td>Carlos Souza</td><td>R$ 2.100,00</td><td>14/10/2023</td></tr>
         </table>
       </section>
-      <button class="btn-primary" onclick="openModal('clienteModal')">+ Novo Cliente</button>
+      <button class="btn-primary" onclick="window.location.href='clientes.html'">+ Novo Cliente</button>
     </main>
-  </div>
-  <div id="clienteModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('clienteModal')">&times;</span>
-      <h2>Adicionar Cliente</h2>
-      <p>Modal placeholder - redirecione para adicionar-cliente.html</p>
-      <button onclick="window.location.href='adicionar-cliente.html'">Ir para formulário</button>
-    </div>
   </div>
   <script>
     function updateClock() {
