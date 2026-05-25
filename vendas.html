@@ -1,259 +1,124 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDV - Zyon ERP</title>
-    <link rel="stylesheet" href="style/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDV - Zyon ERP</title>
+  <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
-    <div class="layout">
-        
-        <nav class="sidebar">
-            <div class="sidebar-header">Zyon ERP</div>
-            <ul class="nav-list">
-                <li><a href="dashboard.html">📊 Dashboard</a></li>
-                <li><a href="clientes.html">📋 Cadastros</a></li>
-                <li><a href="vendas.html" class="active">🛒 Vendas</a></li>
-                <li><a href="#">📦 Estoque</a></li>
-                <li><a href="#">📄 Fiscal</a></li>
-                <li><a href="#">📈 Relatórios</a></li>
-                <li><a href="#">⚙️ Configurações</a></li>
-                <li><a href="index.html" class="logout">🚪 Sair</a></li>
-            </ul>
-        </nav>
-
-        <main class="main-content">
-            <header class="topbar">
-                <span class="app-title" style="font-size: 1.5rem; font-weight: bold; color: var(--navy);">PDV - Ponto de Venda</span>
-                <span style="font-weight: 500; color: var(--text-light);">Usuário: Admin</span>
-            </header>
-
-            <div class="main-area">
-                <div class="row">
-                    <div class="form-group" style="flex: 1;">
-                        <label for="seller">Vendedor</label>
-                        <select id="seller">
-                            <option>Vendedor Padrão</option>
-                            <option>Vendedor 1</option>
-                            <option>Vendedor 2</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label for="customer">Cliente</label>
-                        <select id="customer">
-                            <option>Consumidor Final</option>
-                            <option>Cliente A</option>
-                            <option>Cliente B</option>
-                        </select>
-                    </div>
-                </div>
-
-                <input type="text" class="search-input" id="barcode" placeholder="Código de barras ou nome do produto" onkeydown="if(event.key==='Enter') addItem()">
-
-                <table id="items-table">
-                    <thead>
-                        <tr>
-                            <th>Produto</th>
-                            <th>Quantidade</th>
-                            <th>Valor Unitário</th>
-                            <th>Total</th>
-                            <th style="width: 50px; text-align: center;">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="items-body">
-                        </tbody>
-                </table>
-
-                <div class="summary">
-                    <div>Subtotal: <span id="subtotal">R$ 0,00</span></div>
-                    <div>Desconto: <span id="discount">R$ 0,00</span></div>
-                    <div>Acréscimo: <span id="surcharge">R$ 0,00</span></div>
-                    <div class="total">TOTAL: <span id="total">R$ 0,00</span></div>
-                </div>
-
-                <div class="action-buttons">
-                    <button class="btn-orange" accesskey="4" onclick="alert('Acréscimo')">✔ ACRÉSCIMO (F4)</button>
-                    <button class="btn-purple" accesskey="5" onclick="alert('Desconto')">💲 DESCONTO (F5)</button>
-                    <button class="btn-red" accesskey="9" onclick="clearSale()">✖ CANCELAR (F9)</button>
-                    <button class="btn-blue" accesskey="8" onclick="alert('Operações')">⚙ OPERAÇÕES (F8)</button>
-                    <button class="btn-green-full" accesskey="2" onclick="openModal()">🟢 FINALIZAR (F12)</button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <div id="checkoutModal" class="modal checkout-modal">
-        <div class="modal-content">
-            <div class="checkout-left">
-                <h2>Checkout</h2>
-                <p>Cliente: <span id="modal-customer">Consumidor Final</span></p>
-                
-                <div class="total-box">
-                    <span style="font-size: 1rem; display:block; color:#9ca3af;">FALTA PAGAR</span>
-                    <span id="due-amount">R$ 0,00</span>
-                </div>
-                
-                <p style="margin-bottom: 10px;">Adicionar Pagamento</p>
-                <div class="payment-buttons">
-                    <button onclick="addPayment('Dinheiro')">💵 Dinheiro</button>
-                    <button onclick="addPayment('PIX')">💠 PIX</button>
-                    <button onclick="addPayment('Débito')">💳 Débito</button>
-                    <button onclick="addPayment('Crédito')">💳 Crédito</button>
-                </div>
-                
-                <button class="btn-primary" style="margin-top:auto; padding: 1.2rem; font-size:1.1rem; border-radius: 8px;" onclick="alert('Venda finalizada!')">FINALIZAR VENDA</button>
-            </div>
-
-            <div class="checkout-right">
-                <span class="close" onclick="closeModal()" style="float:right; cursor:pointer; font-size:1.5rem;">&times;</span>
-                
-                <h3 style="margin-bottom:1rem; color:var(--text-light); font-size: 0.9rem;">ITENS DA VENDA</h3>
-                <ul id="modal-item-list" style="list-style: none; margin-bottom: 2rem; color: var(--text-dark); border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
-                    </ul>
-
-                <h3 style="margin-bottom:1rem; color:var(--text-light); font-size: 0.9rem;">PAGAMENTOS LANÇADOS</h3>
-                <ul id="payment-list" style="list-style: none; margin-bottom: 1rem;">
-                    </ul>
-
-                <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem; font-size: 1.1rem;">
-                        <span>Total Pago</span>
-                        <strong id="total-paid">R$ 0,00</strong>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; color: var(--green); font-size: 1.5rem;">
-                        <strong>TROCO TOTAL</strong>
-                        <strong id="change">R$ 0,00</strong>
-                    </div>
-                </div>
-            </div>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-header js-company-name">Zyon ERP</div>
+      <ul class="nav-list">
+        <li><a href="dashboard.html">📊 Dashboard</a></li>
+        <li><a href="clientes.html">📋 Cadastros</a></li>
+        <li><a href="vendas.html" class="active">🛒 Vendas</a></li>
+        <li><a href="estoque.html">📦 Estoque</a></li>
+        <li><a href="fiscal.html">📄 Fiscal</a></li>
+        <li><a href="relatorios.html">📈 Relatórios</a></li>
+        <li><a href="configuracoes.html">⚙️ Configurações</a></li>
+        <li><a href="index.html" class="logout">🚪 Sair</a></li>
+      </ul>
+    </nav>
+    <main class="main-content">
+      <header class="topbar">
+        <span class="app-title">PDV - <span class="js-company-name">Zyon ERP</span></span>
+        <span id="clock"></span>
+      </header>
+      <div class="main-area">
+        <div class="row">
+          <div class="form-group" style="flex: 1;">
+            <label for="seller">Vendedor</label>
+            <select id="seller">
+              <option>Vendedor Padrão</option>
+              <option>Vendedor 1</option>
+              <option>Vendedor 2</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label for="customer">Cliente</label>
+            <select id="customer"></select>
+          </div>
         </div>
+        <div class="row">
+          <div class="form-group" style="flex: 2;">
+            <label for="productSelect">Produto</label>
+            <select id="productSelect"></select>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label for="quantityInput">Quantidade</label>
+            <input id="quantityInput" type="number" min="1" value="1">
+          </div>
+          <div class="form-group" style="display:flex; align-items:flex-end;">
+            <button id="addItemBtn" class="btn-primary" type="button">Adicionar</button>
+          </div>
+        </div>
+        <table id="items-table">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Quantidade</th>
+              <th>Valor Unitário</th>
+              <th>Total</th>
+              <th style="width: 70px; text-align:center;">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="items-body"></tbody>
+        </table>
+        <div class="summary">
+          <div>Subtotal: <span id="subtotal">R$ 0,00</span></div>
+          <div>Desconto: <span id="discount">R$ 0,00</span></div>
+          <div>Acréscimo: <span id="surcharge">R$ 0,00</span></div>
+          <div class="total">TOTAL: <span id="total">R$ 0,00</span></div>
+        </div>
+        <div class="action-buttons">
+          <button id="applySurchargeBtn" class="btn-orange">✔ Acréscimo</button>
+          <button id="applyDiscountBtn" class="btn-purple">💲 Desconto</button>
+          <button id="cancelSaleBtn" class="btn-red">✖ Cancelar</button>
+          <button id="openCheckoutBtn" class="btn-green-full">🟢 Finalizar</button>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div id="checkoutModal" class="modal checkout-modal">
+    <div class="modal-content">
+      <div class="checkout-left">
+        <h2>Checkout</h2>
+        <p>Cliente: <span id="modal-customer">Consumidor Final</span></p>
+        <div class="total-box">
+          <span style="font-size: 1rem; display:block; color:#9ca3af;">Falta pagar</span>
+          <span id="due-amount">R$ 0,00</span>
+        </div>
+        <p style="margin-bottom: 10px;">Adicionar pagamento</p>
+        <div class="payment-buttons">
+          <button id="payCashBtn">💵 Dinheiro</button>
+          <button id="payPixBtn">💠 PIX</button>
+          <button id="payDebitBtn">💳 Débito</button>
+          <button id="payCreditBtn">💳 Crédito</button>
+        </div>
+        <button id="finalizeSaleBtn" class="btn-primary" style="margin-top:auto; padding: 1.2rem; font-size:1.1rem;">Finalizar Venda</button>
+      </div>
+      <div class="checkout-right">
+        <span id="closeModalBtn" class="close" style="float:right; cursor:pointer; font-size:1.5rem;">&times;</span>
+        <h3 style="margin-bottom:1rem; color:var(--text-light); font-size: 0.9rem;">Itens da venda</h3>
+        <ul id="modal-item-list" style="list-style: none; margin-bottom: 2rem; color: var(--text-dark); border-bottom: 1px solid var(--border); padding-bottom: 1rem;"></ul>
+        <h3 style="margin-bottom:1rem; color:var(--text-light); font-size: 0.9rem;">Pagamentos lançados</h3>
+        <ul id="payment-list" style="list-style: none; margin-bottom: 1rem;"></ul>
+        <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem; font-size: 1.1rem;">
+            <span>Total Pago</span>
+            <strong id="total-paid">R$ 0,00</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; color: var(--green); font-size: 1.5rem;">
+            <strong>Troco</strong>
+            <strong id="change">R$ 0,00</strong>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <script>
-        let items = [];
-        let payments = [];
-        let discount = 0;
-        let surcharge = 0;
-
-        function addItem() {
-            const input = document.getElementById('barcode');
-            const product = input.value.trim();
-            if (!product) return;
-            items.push({ name: product, qty: 1, price: Math.random() * 100 + 10 });
-            input.value = '';
-            renderItems();
-            updateTotals();
-        }
-
-        function removeItem(index) {
-            items.splice(index, 1);
-            renderItems();
-            updateTotals();
-        }
-
-        function renderItems() {
-            const tbody = document.getElementById('items-body');
-            tbody.innerHTML = '';
-            items.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${item.name}</td>
-                    <td>${item.qty}</td>
-                    <td>R$ ${item.price.toFixed(2).replace('.', ',')}</td>
-                    <td>R$ ${(item.qty * item.price).toFixed(2).replace('.', ',')}</td>
-                    <td style="text-align: center;"><button onclick="removeItem(${index})" style="color:var(--red); background:none; border:none; cursor:pointer; font-weight:bold;">X</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function updateTotals() {
-            const subtotal = items.reduce((sum, item) => sum + item.qty * item.price, 0);
-            const total = subtotal + surcharge - discount;
-            document.getElementById('subtotal').innerText = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-            document.getElementById('discount').innerText = `R$ ${discount.toFixed(2).replace('.', ',')}`;
-            document.getElementById('surcharge').innerText = `R$ ${surcharge.toFixed(2).replace('.', ',')}`;
-            document.getElementById('total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
-            document.getElementById('due-amount').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        }
-
-        function clearSale() {
-            items = [];
-            payments = [];
-            discount = 0;
-            surcharge = 0;
-            renderItems();
-            updateTotals();
-            document.getElementById('payment-list').innerHTML = '';
-            document.getElementById('total-paid').innerText = 'R$ 0,00';
-            document.getElementById('change').innerText = 'R$ 0,00';
-        }
-
-        function openModal() {
-            document.getElementById('checkoutModal').style.display = 'flex';
-            const itemList = document.getElementById('modal-item-list');
-            itemList.innerHTML = '';
-            if (items.length === 0) {
-                itemList.innerHTML = '<li style="color:#9ca3af; text-align:center;">Nenhum item adicionado</li>';
-            } else {
-                items.forEach(item => {
-                    const li = document.createElement('li');
-                    li.style.display = 'flex';
-                    li.style.justifyContent = 'space-between';
-                    li.style.padding = '0.5rem 0';
-                    li.innerHTML = `<span>${item.qty}x ${item.name}</span> <strong>R$ ${(item.qty * item.price).toFixed(2).replace('.', ',')}</strong>`;
-                    itemList.appendChild(li);
-                });
-            }
-            updateTotals();
-        }
-
-        function closeModal() {
-            document.getElementById('checkoutModal').style.display = 'none';
-        }
-
-        function addPayment(method) {
-            const total = items.reduce((sum, item) => sum + item.qty * item.price, 0) + surcharge - discount;
-            if (total === 0) { alert('Adicione itens à venda primeiro.'); return; }
-            
-            const paidElem = document.getElementById('total-paid');
-            let currentPaid = parseFloat(paidElem.innerText.replace('R$ ', '').replace(',', '.'));
-            if (isNaN(currentPaid)) currentPaid = 0;
-            
-            const remaining = total - currentPaid;
-            if (remaining <= 0) {
-                alert('Valor já totalmente pago.');
-                return;
-            }
-            
-            const paymentAmount = remaining; 
-            payments.push({ method, amount: paymentAmount });
-            currentPaid += paymentAmount;
-            
-            paidElem.innerText = `R$ ${currentPaid.toFixed(2).replace('.', ',')}`;
-            const change = currentPaid - total;
-            document.getElementById('change').innerText = `R$ ${change >= 0 ? change.toFixed(2).replace('.', ',') : '0,00'}`;
-            
-            const paymentList = document.getElementById('payment-list');
-            const li = document.createElement('li');
-            li.style.display = 'flex';
-            li.style.justifyContent = 'space-between';
-            li.style.padding = '0.5rem 0';
-            li.style.borderBottom = '1px dashed #eee';
-            li.innerHTML = `<span>${method}</span><strong>R$ ${paymentAmount.toFixed(2).replace('.', ',')}</strong>`;
-            paymentList.appendChild(li);
-            
-            const due = total - currentPaid;
-            document.getElementById('due-amount').innerText = `R$ ${due > 0 ? due.toFixed(2).replace('.', ',') : '0,00'}`;
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('checkoutModal');
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
-    </script>
+  </div>
+  <script src="js/app.js"></script>
+  <script src="js/vendas.js"></script>
 </body>
 </html>
