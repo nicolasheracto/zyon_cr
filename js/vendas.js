@@ -15,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableBody = document.getElementById('items-body');
   const paymentList = document.getElementById('payment-list');
 
+  function loadSellerOptions() {
+    const sellers = app.getData(app.KEYS.sellers, []);
+    seller.innerHTML = sellers.map((s) => `<option value="${s.nome}" ${s.status !== 'Ativo' ? 'disabled' : ''}>${s.nome}${s.status !== 'Ativo' ? ' (Inativo)' : ''}</option>`).join('');
+    if (!seller.value && sellers.length) seller.value = sellers.find((s) => s.status === 'Ativo')?.nome || sellers[0].nome;
+  }
+
   function loadCustomerOptions() {
     const clients = app.getData(app.KEYS.clients, []).filter((c) => c.status === 'Ativo');
     customer.innerHTML = clients.map((c) => `<option value="${c.nome}">${c.nome}</option>`).join('');
@@ -224,6 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (event.target === modal) closeModal();
   });
 
+  loadSellerOptions();
   loadCustomerOptions();
   loadProductsOptions();
   clearSale();

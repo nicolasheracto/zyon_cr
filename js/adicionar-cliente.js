@@ -31,13 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
     app.setData(app.KEYS.clients, clients);
     app.notify('Cliente salvo com sucesso.');
     setTimeout(() => {
-      window.location.href = 'clientes.html';
+      window.location.href = 'cadastros.html';
     }, 500);
   });
 
   cancelButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      window.location.href = 'clientes.html';
+      window.location.href = 'cadastros.html';
     });
   });
 });

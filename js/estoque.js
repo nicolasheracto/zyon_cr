@@ -6,7 +6,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('productForm');
   const tableBody = document.getElementById('stockTableBody');
   const lowCountEl = document.getElementById('lowStockCount');
+  const lowStockBadge = document.getElementById('lowStockBadge');
   const settings = app.getData(app.KEYS.settings, app.defaults.settings);
+
+  const ordersTableBody = document.getElementById('ordersTableBody');
+  const modal = document.getElementById('orderModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const orderForm = document.getElementById('orderForm');
+  const orderSupplier = document.getElementById('orderSupplier');
+  const orderItems = document.getElementById('orderItems');
+  const addItemBtn = document.getElementById('addItemBtn');
+  const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+  const btnNewOrder = document.getElementById('btnNewOrder');
+
+  const tabs = document.getElementById('estoqueTabs');
+  const tabProdutos = document.getElementById('tabProdutos');
+  const tabPedidos = document.getElementById('tabPedidos');
+
+  let editingOrderId = null;
 
   function getProducts() {
     return app.getData(app.KEYS.products, []);
@@ -16,10 +33,19 @@ document.addEventListener('DOMContentLoaded', () => {
     app.setData(app.KEYS.products, products);
   }
 
-  function render() {
+  function getOrders() {
+    return app.getData(app.KEYS.stockOrders, []);
+  }
+
+  function setOrders(orders) {
+    app.setData(app.KEYS.stockOrders, orders);
+  }
+
+  function renderProducts() {
     const products = getProducts();
     const lowCount = products.filter((p) => (p.quantidade || 0) <= settings.lowStockThreshold).length;
     if (lowCountEl) lowCountEl.textContent = `${lowCount}`;
+    if (lowStockBadge) lowStockBadge.style.display = lowCount > 0 ? 'inline-block' : 'none';
 
     tableBody.innerHTML = '';
     if (!products.length) {
@@ -46,6 +72,143 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function renderOrders() {
+    const orders = getOrders();
+    ordersTableBody.innerHTML = '';
+    if (!orders.length) {
+      ordersTableBody.innerHTML = '<tr><td colspan="7">Nenhum pedido encontrado.</td></tr>';
+      return;
+    }
+
+    orders.slice().reverse().forEach((order) => {
+      const tr = document.createElement('tr');
+      const itemCount = order.items.reduce((acc, i) => acc + i.quantity, 0);
+      const total = order.items.reduce((acc, i) => acc + (i.quantity * i.unitPrice), 0);
+      const isPending = order.status === 'Pendente';
+
+      tr.innerHTML = `
+        <td><strong>#${order.id.slice(0, 8)}</strong></td>
+        <td>${order.supplierName}</td>
+        <td>${order.date}</td>
+        <td>${itemCount} itens</td>
+        <td>${app.formatCurrency(total)}</td>
+        <td><span class="status-badge ${isPending ? 'status-inactive' : 'status-active'}">${order.status}</span></td>
+        <td class="action-btns">
+          ${isPending ? '<span title="Receber" data-action="receive" data-id="' + order.id + '">✅ Receber</span>' : ''}
+          ${isPending ? '<span title="Cancelar" data-action="cancel" data-id="' + order.id + '">🚫 Cancelar</span>' : ''}
+          <span title="Visualizar" data-action="view" data-id="${order.id}">👁️</span>
+        </td>
+      `;
+      ordersTableBody.appendChild(tr);
+    });
+  }
+
+  function populateSelects() {
+    const suppliers = app.getData(app.KEYS.suppliers, []).filter((s) => s.status === 'Ativo');
+    orderSupplier.innerHTML = '<option value="">Selecione...</option>';
+    suppliers.forEach((s) => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = s.nome + (s.documento ? ' - ' + s.documento : '');
+      orderSupplier.appendChild(opt);
+    });
+
+    const products = getProducts();
+    document.querySelectorAll('.item-product').forEach((sel) => {
+      const current = sel.value;
+      sel.innerHTML = '<option value="">Selecione o produto...</option>';
+      products.forEach((p) => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.sku + ' - ' + p.nome + ' (R$ ' + p.preco?.toFixed(2) + ')';
+        opt.dataset.preco = p.preco;
+        sel.appendChild(opt);
+      });
+      if (current) sel.value = current;
+    });
+  }
+
+  function addOrderItem(productId, qty, price) {
+    const div = document.createElement('div');
+    div.className = 'row order-item';
+    div.style.alignItems = 'center';
+    div.innerHTML = `
+      <select class="item-product" style="flex:2;padding:0.75rem;border:1px solid var(--border);border-radius:8px" required>
+        <option value="">Selecione o produto...</option>
+      </select>
+      <input type="number" class="item-qty" placeholder="Qtd" min="1" value="${qty || 1}" style="flex:0.5;padding:0.75rem;border:1px solid var(--border);border-radius:8px" required>
+      <input type="number" class="item-price" placeholder="Preço unit." step="0.01" min="0.01" value="${price || ''}" style="flex:0.7;padding:0.75rem;border:1px solid var(--border);border-radius:8px" required>
+      <button type="button" class="remove-item-btn" title="Remover item" style="flex:0;background:none;border:none;font-size:1.3rem;cursor:pointer;padding:0.5rem">✕</button>
+    `;
+    orderItems.appendChild(div);
+    populateSelects();
+    if (productId) {
+      const sel = div.querySelector('.item-product');
+      if (sel) sel.value = productId;
+    }
+    div.querySelector('.remove-item-btn').addEventListener('click', () => {
+      if (orderItems.querySelectorAll('.order-item').length <= 1) {
+        app.notify('O pedido precisa de pelo menos 1 item.');
+        return;
+      }
+      div.remove();
+    });
+
+    const productSel = div.querySelector('.item-product');
+    if (productSel) {
+      productSel.addEventListener('change', () => {
+        const selectedOpt = productSel.options[productSel.selectedIndex];
+        const priceInput = div.querySelector('.item-price');
+        if (selectedOpt && selectedOpt.dataset.preco && !priceInput.value) {
+          priceInput.value = selectedOpt.dataset.preco;
+        }
+      });
+    }
+  }
+
+  function openOrderModal(orderId) {
+    editingOrderId = orderId;
+    modalTitle.textContent = orderId ? 'Editar Pedido' : 'Novo Pedido de Estoque';
+    orderForm.reset();
+    orderItems.innerHTML = '';
+    addOrderItem(null, 1, null);
+
+    if (orderId) {
+      const orders = getOrders();
+      const order = orders.find((o) => o.id === orderId);
+      if (order) {
+        orderSupplier.value = order.supplierId;
+        orderItems.innerHTML = '';
+        order.items.forEach((item) => {
+          addOrderItem(item.productId, item.quantity, item.unitPrice);
+        });
+      }
+    }
+
+    populateSelects();
+    modal.style.display = 'flex';
+  }
+
+  function closeOrderModal() {
+    modal.style.display = 'none';
+    editingOrderId = null;
+  }
+
+  tabs?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab');
+    if (!btn) return;
+    const tab = btn.dataset.tab;
+    if (!tab) return;
+
+    tabs.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    tabProdutos.style.display = tab === 'produtos' ? '' : 'none';
+    tabPedidos.style.display = tab === 'pedidos' ? '' : 'none';
+
+    if (tab === 'pedidos') renderOrders();
+  });
+
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
     const sku = document.getElementById('sku')?.value.trim();
@@ -63,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setProducts(products);
     form.reset();
     app.notify('Produto cadastrado.');
-    render();
+    renderProducts();
   });
 
   tableBody?.addEventListener('click', (event) => {
@@ -82,8 +245,136 @@ document.addEventListener('DOMContentLoaded', () => {
     if (action === 'remove') products.splice(idx, 1);
 
     setProducts(products);
-    render();
+    renderProducts();
   });
 
-  render();
+  btnNewOrder?.addEventListener('click', () => openOrderModal(null));
+  cancelOrderBtn?.addEventListener('click', closeOrderModal);
+
+  addItemBtn?.addEventListener('click', () => addOrderItem(null, 1, null));
+
+  orderForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const supplierId = orderSupplier.value;
+    if (!supplierId) { app.notify('Selecione um fornecedor.'); return; }
+
+    const suppliers = app.getData(app.KEYS.suppliers, []);
+    const supplier = suppliers.find((s) => s.id === supplierId);
+    if (!supplier) { app.notify('Fornecedor não encontrado.'); return; }
+
+    const itemRows = orderItems.querySelectorAll('.order-item');
+    const items = [];
+    let valid = true;
+
+    itemRows.forEach((row) => {
+      const productSel = row.querySelector('.item-product');
+      const qtyInput = row.querySelector('.item-qty');
+      const priceInput = row.querySelector('.item-price');
+      if (!productSel?.value || !qtyInput?.value || !priceInput?.value) {
+        valid = false;
+        return;
+      }
+      items.push({
+        productId: productSel.value,
+        productName: productSel.options[productSel.selectedIndex]?.textContent || '',
+        quantity: Number(qtyInput.value),
+        unitPrice: Number(priceInput.value)
+      });
+    });
+
+    if (!valid || !items.length) {
+      app.notify('Preencha todos os itens corretamente.');
+      return;
+    }
+
+    const orders = getOrders();
+    const now = new Date().toLocaleString('pt-BR');
+
+    if (editingOrderId) {
+      const idx = orders.findIndex((o) => o.id === editingOrderId);
+      if (idx >= 0) {
+        orders[idx].supplierId = supplierId;
+        orders[idx].supplierName = supplier.nome;
+        orders[idx].items = items;
+        orders[idx].date = now;
+      }
+      app.notify('Pedido atualizado.');
+    } else {
+      orders.push({
+        id: crypto.randomUUID(),
+        supplierId,
+        supplierName: supplier.nome,
+        date: now,
+        items,
+        status: 'Pendente'
+      });
+      app.notify('Pedido criado com sucesso.');
+    }
+
+    setOrders(orders);
+    closeOrderModal();
+    renderOrders();
+  });
+
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) closeOrderModal();
+  });
+
+  ordersTableBody?.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
+    const id = target.dataset.id;
+    const action = target.dataset.action;
+    if (!id || !action) return;
+
+    const orders = getOrders();
+    const idx = orders.findIndex((o) => o.id === id);
+    if (idx < 0) return;
+
+    if (action === 'view') {
+      const o = orders[idx];
+      let msg = 'Pedido: #' + o.id.slice(0, 8) + '\n';
+      msg += 'Fornecedor: ' + o.supplierName + '\n';
+      msg += 'Data: ' + o.date + '\n';
+      msg += 'Status: ' + o.status + '\n\n';
+      msg += 'Itens:\n';
+      o.items.forEach((item, i) => {
+        msg += (i + 1) + '. ' + item.productName + ' - Qtd: ' + item.quantity + ' x R$ ' + item.unitPrice.toFixed(2) + '\n';
+      });
+      alert(msg);
+      return;
+    }
+
+    if (action === 'receive') {
+      if (!confirm('Receber este pedido? O estoque será atualizado.')) return;
+      const products = getProducts();
+      const order = orders[idx];
+      order.items.forEach((item) => {
+        const prod = products.find((p) => p.id === item.productId);
+        if (prod) {
+          prod.quantidade = (prod.quantidade || 0) + item.quantity;
+        }
+      });
+      setProducts(products);
+      orders[idx].status = 'Recebido';
+      orders[idx].receivedDate = new Date().toLocaleString('pt-BR');
+      setOrders(orders);
+      app.notify('Pedido recebido! Estoque atualizado.');
+      renderProducts();
+      renderOrders();
+      return;
+    }
+
+    if (action === 'cancel') {
+      if (!confirm('Cancelar este pedido?')) return;
+      orders[idx].status = 'Cancelado';
+      setOrders(orders);
+      app.notify('Pedido cancelado.');
+      renderOrders();
+      return;
+    }
+  });
+
+  renderProducts();
 });

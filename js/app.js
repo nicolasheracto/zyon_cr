@@ -4,7 +4,10 @@
     products: 'zyon_products',
     sales: 'zyon_sales',
     fiscalNotes: 'zyon_fiscal_notes',
-    settings: 'zyon_settings'
+    settings: 'zyon_settings',
+    sellers: 'zyon_sellers',
+    suppliers: 'zyon_suppliers',
+    stockOrders: 'zyon_stock_orders'
   };
 
   const defaults = {
@@ -54,7 +57,28 @@
       }
     ],
     sales: [],
-    fiscalNotes: []
+    fiscalNotes: [],
+    sellers: [
+      {
+        id: crypto.randomUUID(),
+        nome: 'Carlos Vendedor',
+        documento: '111.222.333-44',
+        contato: 'carlos@email.com',
+        comissao: 5,
+        status: 'Ativo'
+      }
+    ],
+    suppliers: [
+      {
+        id: crypto.randomUUID(),
+        nome: 'Distribuidora ABC Ltda',
+        documento: '00.000.000/0001-00',
+        contato: 'abc@distribuidora.com',
+        endereco: 'Av. Principal, 1000',
+        status: 'Ativo'
+      }
+    ],
+    stockOrders: []
   };
 
   function getData(key, fallback) {
@@ -77,6 +101,9 @@
     if (!localStorage.getItem(KEYS.products)) setData(KEYS.products, defaults.products);
     if (!localStorage.getItem(KEYS.sales)) setData(KEYS.sales, defaults.sales);
     if (!localStorage.getItem(KEYS.fiscalNotes)) setData(KEYS.fiscalNotes, defaults.fiscalNotes);
+    if (!localStorage.getItem(KEYS.sellers)) setData(KEYS.sellers, defaults.sellers);
+    if (!localStorage.getItem(KEYS.suppliers)) setData(KEYS.suppliers, defaults.suppliers);
+    if (!localStorage.getItem(KEYS.stockOrders)) setData(KEYS.stockOrders, defaults.stockOrders);
   }
 
   function formatCurrency(value) {
