@@ -21,28 +21,40 @@
         <li><a href="index.html" class="logout">🚪 Sair</a></li>
       </ul>
     </nav>
+
     <main class="main-content">
       <header class="topbar">
         <span class="app-title js-company-name">Zyon ERP</span>
         <span id="clock"></span>
       </header>
+
+      <!-- CABEÇALHO: título + botão para voltar à página de cadastros -->
       <div class="page-header">
         <h1>Novo Cliente</h1>
         <button type="button" class="btn-secondary cancel-client-btn">Cancelar</button>
       </div>
+
+      <!-- FORMULÁRIO DE CADASTRO DE CLIENTE -->
       <div class="main-area">
         <form id="clientForm">
+          <!-- Aba informativa (única, apenas para manter o padrão visual) -->
           <div class="tabs">
             <button type="button" class="tab active">Dados Gerais</button>
           </div>
+
+          <!-- SELEÇÃO DO TIPO DE PESSOA: Física (PF) ou Jurídica (PJ) -->
           <div class="row">
             <label><input type="radio" name="tipoPessoa" value="pf" checked> Pessoa Física</label>
             <label><input type="radio" name="tipoPessoa" value="pj"> Pessoa Jurídica</label>
           </div>
+
+          <!-- Campo obrigatório: Nome ou Razão Social -->
           <div class="form-group">
             <label for="nome">Nome / Razão Social *</label>
             <input id="nome" type="text" placeholder="Ex: João Silva">
           </div>
+
+          <!-- Linha com dois campos: CPF/CNPJ e Contato -->
           <div class="row">
             <div class="form-group" style="flex:1;">
               <label for="documento">CPF / CNPJ *</label>
@@ -53,6 +65,8 @@
               <input id="contato" type="text" placeholder="email@exemplo.com">
             </div>
           </div>
+
+          <!-- BOTÕES DE AÇÃO: cancelar (volta) ou salvar (envia formulário) -->
           <div class="modal-actions">
             <button type="button" class="btn-secondary cancel-client-btn">Cancelar</button>
             <button type="submit" class="btn-primary">Salvar Cliente</button>
@@ -61,6 +75,7 @@
       </div>
     </main>
   </div>
+
   <script src="js/app.js"></script>
   <script src="js/adicionar-cliente.js"></script>
 </body>

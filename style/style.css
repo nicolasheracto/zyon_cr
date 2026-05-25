@@ -1,29 +1,32 @@
+/* ===== VARIÁVEIS GLOBAIS (CSS Custom Properties) ===== */
 :root {
-  /* Cores Zyon ERP (Baseado no PDF) */
-  --navy: #151b26;        /* Fundo principal da barra lateral */
-  --navy-light: #1e293b;  /* Fundo de modais escuros */
-  --royal: #2563eb;       /* Azul primário */
-  --royal-hover: #1d4ed8;
-  --green: #10b981;
-  --yellow: #f59e0b;
-  --purple: #6366f1;
-  --red: #ef4444;
-  --gray-bg: #f3f4f6;     /* Fundo da área principal */
-  --white: #ffffff;
-  --text-dark: #1f2937;
-  --text-light: #6b7280;
-  --border: #e5e7eb;
-  --radius: 12px;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --transition: 0.3s ease;
+  /* Paleta de cores do Zyon ERP */
+  --navy: #151b26;        /* Fundo escuro da barra lateral */
+  --navy-light: #1e293b;  /* Fundo de modais e painéis escuros */
+  --royal: #2563eb;       /* Azul primário (botões, links ativos, foco) */
+  --royal-hover: #1d4ed8; /* Tom mais escuro para hover do azul primário */
+  --green: #10b981;       /* Verde para status OK, sucesso, troco */
+  --yellow: #f59e0b;      /* Amarelo/laranja para botão de acréscimo */
+  --purple: #6366f1;      /* Roxo para botão de desconto */
+  --red: #ef4444;         /* Vermelho para botão cancelar, estoque baixo */
+  --gray-bg: #f3f4f6;     /* Cinza claro para fundo da área principal */
+  --white: #ffffff;       /* Branco para cards, tabelas, formulários */
+  --text-dark: #1f2937;   /* Cor principal do texto (quase preto) */
+  --text-light: #6b7280;  /* Cor secundária do texto (cinza) */
+  --border: #e5e7eb;      /* Cor das bordas de inputs, tabelas, cards */
+  --radius: 12px;          /* Raio de borda arredondado padrão */
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Sombra suave para cards */
+  --transition: 0.3s ease; /* Transição padrão para hovers e interações */
 }
 
+/* Reset geral: remove margens/paddings e define box-sizing border-box */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* Estilo base do body: fonte, cor de fundo e texto */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: var(--gray-bg);
@@ -31,18 +34,19 @@ body {
   line-height: 1.6;
 }
 
+/* Remove sublinhado e herda cor dos links */
 a { text-decoration: none; color: inherit; }
 
-/* ================= LOGIN PAGE ================= */
+/* ===== PÁGINA DE LOGIN ===== */
 .login-page {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: var(--navy); /* Fundo escuro conforme o Zyon */
+  background: var(--navy); /* Fundo escuro característico */
   padding: 1rem;
 }
-.login-container { width: 100%; max-width: 400px; }
+.login-container { width: 100%; max-width: 400px; } /* Limita largura do card */
 .login-card {
   background: var(--white);
   border-radius: var(--radius);
@@ -54,14 +58,14 @@ a { text-decoration: none; color: inherit; }
 .server-status { margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-light); }
 .status-indicator.green { display: inline-block; width: 10px; height: 10px; background: var(--green); border-radius: 50%; margin-right: 5px; }
 
-/* ================= LAYOUT PRINCIPAL ================= */
+/* ===== LAYOUT PRINCIPAL (Sidebar + Main) ===== */
 .layout {
   display: flex;
-  height: 100vh;
-  overflow: hidden;
+  height: 100vh;        /* Ocupa a altura total da viewport */
+  overflow: hidden;     /* Impede scroll duplicado (scroll apenas no main) */
 }
 
-/* Sidebar */
+/* SIDEBAR: navegação fixa à esquerda */
 .sidebar {
   width: 250px;
   background: var(--navy);
@@ -81,12 +85,12 @@ a { text-decoration: none; color: inherit; }
   background: var(--royal); color: var(--white);
 }
 
-/* Main Content */
+/* CONTEÚDO PRINCIPAL: área scrollável à direita da sidebar */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow-y: auto;     /* Scroll apenas no conteúdo, sidebar fica fixa */
   padding: 1rem 2rem;
 }
 .topbar {
@@ -99,7 +103,7 @@ a { text-decoration: none; color: inherit; }
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;
 }
 
-/* ================= DASHBOARD & KPIS ================= */
+/* ===== CARDS DE INDICADORES (KPIs) ===== */
 .kpi-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -112,26 +116,28 @@ a { text-decoration: none; color: inherit; }
 }
 .card h3 { font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem; }
 .card p { font-size: 1.8rem; font-weight: bold; }
+/* Cores da borda superior de cada card KPI */
 .card-blue { border-top-color: var(--royal); }
 .card-green { border-top-color: var(--green); }
 .card-yellow { border-top-color: var(--yellow); }
 .card-purple { border-top-color: var(--purple); }
 
-/* ================= TABELAS ================= */
+/* ===== TABELAS ===== */
 table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
 th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
 th { background: #f9fafb; font-weight: 600; color: var(--text-light); text-transform: uppercase; font-size: 0.85rem; }
-tr:hover { background: #f8fafc; }
+tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
 
-/* ================= FORMULÁRIOS & BOTÕES ================= */
+/* ===== FORMULÁRIOS E BOTÕES ===== */
 .form-group { margin-bottom: 1rem; text-align: left; }
 .form-group label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--text-dark); }
 .form-group input, .form-group select {
   width: 100%; padding: 0.75rem; border: 1px solid var(--border);
   border-radius: 8px; font-size: 0.95rem; outline: none;
 }
-.form-group input:focus { border-color: var(--royal); }
+.form-group input:focus { border-color: var(--royal); } /* Destaque ao focar */
 
+/* Botões primário (azul) e secundário (cinza) */
 .btn-primary, .btn-secondary {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 0.75rem 1.5rem; border: none; border-radius: 8px;
@@ -141,7 +147,7 @@ tr:hover { background: #f8fafc; }
 .btn-primary:hover { background: var(--royal-hover); }
 .btn-secondary { background: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--border); }
 
-/* ================= MODAIS PADRÃO ================= */
+/* ===== MODAIS (Janelas de diálogo) ===== */
 .modal {
   display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
   justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px);
@@ -152,30 +158,31 @@ tr:hover { background: #f8fafc; }
 }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; }
 
-/* ================= ABAS (TABS) ================= */
+/* ===== ABAS (Tabs) ===== */
 .tabs { display: flex; gap: 10px; margin-bottom: 1.5rem; border-bottom: none; }
 .tab { 
   background: var(--gray-bg); border: none; padding: 10px 20px; 
   border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-light);
 }
-.tab.active { background: var(--royal); color: var(--white); }
+.tab.active { background: var(--royal); color: var(--white); } /* Aba selecionada */
 
-/* ================= TELA DE PDV (VENDAS) ================= */
+/* ===== TELA DE PDV (VENDAS) ===== */
 .main-area { background: var(--white); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); }
-.row { display: flex; gap: 15px; margin-bottom: 1rem; }
+.row { display: flex; gap: 15px; margin-bottom: 1rem; } /* Linha flexível para formulários */
 .search-input { width: 100%; padding: 1rem; font-size: 1rem; border: 2px solid var(--royal); border-radius: 8px; margin-bottom: 1.5rem; }
 .summary { text-align: right; font-size: 1.1rem; margin-top: 1.5rem; }
 .summary .total { font-size: 2rem; font-weight: bold; color: var(--text-dark); }
 
+/* Botões de ação do PDV em grid de 2 colunas */
 .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1.5rem; }
 .action-buttons button { padding: 1.2rem; font-weight: bold; border-radius: 8px; border: none; color: white; cursor: pointer; text-transform: uppercase; }
-.btn-orange { background: var(--yellow); }
-.btn-purple { background: var(--purple); }
-.btn-red { background: var(--red); }
+.btn-orange { background: var(--yellow); }    /* Acréscimo */
+.btn-purple { background: var(--purple); }    /* Desconto */
+.btn-red { background: var(--red); }          /* Cancelar */
 .btn-blue { background: var(--royal); }
-.btn-green-full { background: var(--green); grid-column: span 2; }
+.btn-green-full { background: var(--green); grid-column: span 2; } /* Finalizar (ocupa 2 colunas) */
 
-/* ================= MODAL CHECKOUT PDV (IDÊNTICO AO PDF) ================= */
+/* ===== MODAL DE CHECKOUT DO PDV ===== */
 .checkout-modal .modal-content {
   display: flex; padding: 0; max-width: 900px; height: 600px; overflow: hidden; background: transparent;
 }
@@ -195,6 +202,8 @@ tr:hover { background: #f8fafc; }
   padding: 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; transition: var(--transition);
 }
 .payment-buttons button:hover { border-color: var(--royal); color: var(--royal); }
+
+/* ===== BARRA DE PESQUISA (com ícone de lupa dentro do input) ===== */
 .search-container {
   display: flex;
   gap: 15px;
@@ -207,7 +216,7 @@ tr:hover { background: #f8fafc; }
 }
 .search-input-wrapper input {
   width: 100%;
-  padding: 0.9rem 1rem 0.9rem 2.5rem;
+  padding: 0.9rem 1rem 0.9rem 2.5rem; /* padding extra à esquerda para o ícone */
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 1rem;
@@ -227,12 +236,16 @@ tr:hover { background: #f8fafc; }
   color: var(--text-light);
   font-size: 1.1rem;
 }
+
+/* ===== CARD DE TABELA (com bordas arredondadas e sombra) ===== */
 .table-card {
   background: var(--white);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
 }
+
+/* ===== BADGES DE STATUS (ativo, inativo, baixo estoque) ===== */
 .status-badge {
   padding: 6px 12px;
   border-radius: 20px;
@@ -241,13 +254,15 @@ tr:hover { background: #f8fafc; }
   display: inline-block;
 }
 .status-active {
-  background-color: #d1fae5;
+  background-color: #d1fae5; /* Verde claro */
   color: #065f46;
 }
 .status-inactive {
-  background-color: #fee2e2;
+  background-color: #fee2e2; /* Vermelho claro */
   color: #991b1b;
 }
+
+/* ===== BOTÕES DE AÇÃO NAS TABELAS (ícones clicáveis) ===== */
 .action-btns span {
   cursor: pointer;
   padding: 6px;
@@ -258,6 +273,8 @@ tr:hover { background: #f8fafc; }
 .action-btns span:hover {
   background: var(--gray-bg);
 }
+
+/* ===== BOTÃO REMOVER ITEM (X vermelho) ===== */
 .remove-item-btn {
   color: var(--red);
   background: transparent;
@@ -265,6 +282,8 @@ tr:hover { background: #f8fafc; }
   cursor: pointer;
   font-weight: bold;
 }
+
+/* ===== TOAST (Notificação flutuante) ===== */
 .toast {
   position: fixed;
   right: 20px;

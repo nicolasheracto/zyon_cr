@@ -21,22 +21,28 @@
         <li><a href="index.html" class="logout">🚪 Sair</a></li>
       </ul>
     </nav>
+
     <main class="main-content">
       <header class="topbar">
         <span class="app-title">Configurações - <span class="js-company-name">Zyon ERP</span></span>
         <span id="clock"></span>
       </header>
+
+      <!-- FORMULÁRIO DE CONFIGURAÇÕES GLOBAIS DO SISTEMA -->
       <div class="main-area">
         <h2>Preferências Gerais</h2>
         <form id="settingsForm">
+          <!-- Nome da empresa: usado no título da sidebar e topbar -->
           <div class="form-group">
             <label for="companyName">Nome da Empresa</label>
             <input id="companyName" type="text">
           </div>
+          <!-- Limite mínimo de estoque: produtos abaixo desse valor são destacados como "Baixo" -->
           <div class="form-group">
             <label for="lowStockThreshold">Limite de estoque baixo</label>
             <input id="lowStockThreshold" type="number" min="0">
           </div>
+          <!-- Botão para salvar as configurações (armazenadas no localStorage) -->
           <div class="modal-actions">
             <button type="submit" class="btn-primary">Salvar Configurações</button>
           </div>
@@ -44,6 +50,7 @@
       </div>
     </main>
   </div>
+
   <script src="js/app.js"></script>
   <script src="js/configuracoes.js"></script>
 </body>

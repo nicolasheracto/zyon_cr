@@ -1,28 +1,43 @@
 <!DOCTYPE html>
+<!-- Declaração do tipo HTML5 -->
 <html lang="pt-BR">
+<!-- Início do documento HTML com idioma português brasileiro -->
 <head>
+  <!-- Meta tags para codificação de caracteres e responsividade -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Título exibido na aba do navegador -->
   <title>Login - Zyon ERP</title>
+  <!-- Importação do arquivo de estilos CSS global -->
   <link rel="stylesheet" href="style/style.css">
 </head>
+<!-- Classe 'login-page' aplica fundo escuro específico para tela de login -->
 <body class="login-page">
+  <!-- Container centralizado que limita a largura máxima do formulário -->
   <div class="login-container">
+    <!-- Card branco com sombra que envolve o formulário de login -->
     <div class="login-card">
+      <!-- Espaço reservado para o logotipo da empresa -->
       <div class="logo"></div>
+      <!-- Título principal do sistema -->
       <h1>Zyon ERP</h1>
+      <!-- Indicador visual de status do servidor (sempre verde nessa versão local) -->
       <div class="server-status">
         <span class="status-indicator green"></span> Servidor Disponível
       </div>
+      <!-- Formulário de login que redireciona ao dashboard no submit -->
       <form id="loginForm" action="dashboard.html">
+        <!-- Campo de texto para o nome do usuário, pré-preenchido com "Admin" -->
         <div class="form-group">
           <label for="username">Usuário</label>
           <input type="text" id="username" value="Admin" required>
         </div>
+        <!-- Campo de senha (oculta os caracteres digitados) -->
         <div class="form-group">
           <label for="password">Senha</label>
           <input type="password" id="password" required>
         </div>
+        <!-- Botão de Submit para enviar o formulário -->
         <button type="submit" class="btn-primary">Entrar</button>
       </form>
     </div>

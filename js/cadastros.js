@@ -1,3 +1,9 @@
+/* === TELA DE CADASTROS UNIFICADA (cadastros.html) ===
+   - Gerencia 4 entidades com abas: Clientes, Produtos, Vendedores, Fornecedores
+   - Cada entidade possui: busca textual, formulário de cadastro inline e tabela com ações
+   - As ações incluem: visualizar, editar, ativar/inativar (ou excluir para produtos)
+   - Arquitetura genérica: a config (entities) define campos, renderização e regras */
+
 document.addEventListener('DOMContentLoaded', () => {
   const app = window.ZyonApp;
   app.startClock();
@@ -6,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabNav = document.getElementById('tabNav');
   const tabContent = document.getElementById('tabContent');
 
+  /* Configuração de cada entidade: chave, label, campos, renderização e regras */
   const entities = {
     clientes: {
       key: app.KEYS.clients,
@@ -15,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'documento', label: 'CPF / CNPJ *', type: 'text', required: true },
         { id: 'contato', label: 'Contato', type: 'text', required: false }
       ],
+      /* Renderiza uma linha da tabela para um item */
       renderRow: (item) => {
         const active = item.status === 'Ativo';
         return `
@@ -139,18 +147,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  let currentTab = 'clientes';
+  let currentTab = 'clientes'; /* Aba ativa no momento */
 
+  /* Retorna os dados da entidade da aba atual */
   function getData(tab) {
     const cfg = entities[tab];
     return app.getData(cfg.key, []);
   }
 
+  /* Salva os dados da entidade da aba atual */
   function setData(tab, data) {
     const cfg = entities[tab];
     app.setData(cfg.key, data);
   }
 
+  /* Constrói o HTML do formulário de cadastro para uma entidade */
   function buildFormHTML(tab) {
     const cfg = entities[tab];
     let html = '<form class="entity-form" data-tab="' + tab + '"><div class="row" style="flex-wrap:wrap">';
@@ -168,18 +179,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return html;
   }
 
+  /* Renderiza o conteúdo completo de uma aba (busca + formulário + tabela) */
   function renderTab(tab) {
     const cfg = entities[tab];
     const data = getData(tab);
     const settings = app.getData(app.KEYS.settings, app.defaults.settings);
     const searchTerm = (document.getElementById('search-' + tab)?.value || '').toLowerCase().trim();
 
+    /* Aplica filtro de busca textual */
     const filtered = searchTerm
       ? data.filter((item) => cfg.getSearchText(item).toLowerCase().includes(searchTerm))
       : data;
 
+    /* Monta o HTML completo da aba */
     let html = '';
 
+    /* Barra de pesquisa */
     html += '<div class="search-container">';
     html += '  <div class="search-input-wrapper">';
     html += '    <span class="search-icon">🔍</span>';
@@ -188,11 +203,13 @@ document.addEventListener('DOMContentLoaded', () => {
     html += '  <button class="btn-secondary clear-search-btn" data-tab="' + tab + '">Limpar</button>';
     html += '</div>';
 
+    /* Formulário de cadastro */
     html += '<div class="main-area" style="margin-bottom:1.5rem">';
     html += '  <h3 style="margin-bottom:1rem">Novo ' + cfg.label + '</h3>';
     html += buildFormHTML(tab);
     html += '</div>';
 
+    /* Tabela com os registros */
     html += '<div class="table-card">';
     html += '  <table><thead><tr>';
     cfg.columns.forEach((col) => { html += '<th>' + col + '</th>'; });
@@ -210,11 +227,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tabContent.innerHTML = html;
 
+    /* === EVENT LISTENERS DO CONTEÚDO RENDERIZADO === */
+
+    /* Busca ao digitar */
     const searchInput = document.getElementById('search-' + tab);
     if (searchInput) {
       searchInput.addEventListener('input', () => renderTab(tab));
     }
 
+    /* Botão limpar busca */
     tabContent.querySelectorAll('.clear-search-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const inp = document.getElementById('search-' + btn.dataset.tab);
@@ -223,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+    /* Submit do formulário de cadastro */
     const form = tabContent.querySelector('.entity-form');
     if (form) {
       form.addEventListener('submit', (e) => {
@@ -233,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (el) formData[f.id] = el.value;
         });
 
+        /* Valida campos obrigatórios */
         const requiredFields = cfg.fields.filter((f) => f.required);
         const missing = requiredFields.some((f) => !formData[f.id]?.trim());
         if (missing) {
@@ -240,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        /* Salva o novo item */
         const items = getData(tab);
         items.push(cfg.buildItem(formData));
         setData(tab, items);
@@ -249,6 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    /* Ações na tabela (view, edit, toggle, remove) */
     const tbody = document.getElementById('tbody-' + tab);
     if (tbody) {
       tbody.addEventListener('click', (e) => {
@@ -262,38 +287,43 @@ document.addEventListener('DOMContentLoaded', () => {
         const idx = items.findIndex((i) => i.id === id);
         if (idx < 0) return;
 
+        /* Visualizar: exibe todos os campos via alert */
         if (action === 'view') {
           const item = items[idx];
           let msg = '';
           cfg.fields.forEach((f) => {
-            const val = item[f.id.replace('nomeProduto','nome').replace('precoProduto','preco').replace('qtdProduto','quantidade').replace('nomeVendedor','nome').replace('docVendedor','documento').replace('contatoVendedor','contato').replace('comissaoVendedor','comissao').replace('nomeFornecedor','nome').replace('docFornecedor','documento').replace('contatoFornecedor','contato').replace('enderecoFornecedor','endereco')] ?? item[f.id] ?? '';
-            msg += f.label.replace(' *','') + ': ' + val + '\n';
+            /* Mapeia IDs de campos para as chaves reais do objeto */
+            const keyMap = {
+              nomeProduto: 'nome', precoProduto: 'preco', qtdProduto: 'quantidade',
+              nomeVendedor: 'nome', docVendedor: 'documento', contatoVendedor: 'contato', comissaoVendedor: 'comissao',
+              nomeFornecedor: 'nome', docFornecedor: 'documento', contatoFornecedor: 'contato', enderecoFornecedor: 'endereco'
+            };
+            const key = keyMap[f.id] || f.id;
+            const val = item[key] ?? '';
+            msg += f.label.replace(' *', '') + ': ' + val + '\n';
           });
           msg += 'Status: ' + item.status;
           alert(msg);
           return;
         }
 
+        /* Editar: solicita novo valor para cada campo via prompt */
         if (action === 'edit') {
-          const keys = Object.keys(items[idx]);
           const current = items[idx];
           let valid = true;
           cfg.fields.forEach((f) => {
-            let key = f.id;
-            if (key === 'nomeProduto') key = 'nome';
-            else if (key === 'precoProduto') key = 'preco';
-            else if (key === 'qtdProduto') key = 'quantidade';
-            else if (key === 'nomeVendedor') key = 'nome';
-            else if (key === 'docVendedor') key = 'documento';
-            else if (key === 'contatoVendedor') key = 'contato';
-            else if (key === 'comissaoVendedor') key = 'comissao';
-            else if (key === 'nomeFornecedor') key = 'nome';
-            else if (key === 'docFornecedor') key = 'documento';
-            else if (key === 'contatoFornecedor') key = 'contato';
-            else if (key === 'enderecoFornecedor') key = 'endereco';
+            const keyMap = {
+              nomeProduto: 'nome', precoProduto: 'preco', qtdProduto: 'quantidade',
+              nomeVendedor: 'nome', docVendedor: 'documento', contatoVendedor: 'contato', comissaoVendedor: 'comissao',
+              nomeFornecedor: 'nome', docFornecedor: 'documento', contatoFornecedor: 'contato', enderecoFornecedor: 'endereco'
+            };
+            const key = keyMap[f.id] || f.id;
             const val = prompt(f.label + ':', current[key] ?? '');
             if (f.required && !val) { valid = false; return; }
-            if (val !== null) items[idx][key] = key === 'preco' || key === 'quantidade' || key === 'comissao' ? Number(val) : val;
+            if (val !== null) {
+              /* Converte campos numéricos */
+              items[idx][key] = (key === 'preco' || key === 'quantidade' || key === 'comissao') ? Number(val) : val;
+            }
           });
           if (!valid) { app.notify('Campos obrigatórios não podem ficar vazios.'); return; }
           setData(tab, items);
@@ -302,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        /* Alternar status (Ativo <-> Inativo) */
         if (action === 'toggle') {
           items[idx].status = items[idx].status === 'Ativo' ? 'Inativo' : 'Ativo';
           setData(tab, items);
@@ -310,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        /* Excluir (apenas para produtos) */
         if (action === 'remove') {
           if (!confirm('Excluir ' + cfg.label.toLowerCase() + ' "' + items[idx].nome + '"?')) return;
           items.splice(idx, 1);
@@ -321,12 +353,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* Escapa caracteres HTML para evitar XSS no valor da busca */
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
   }
 
+  /* Navegação por abas */
   tabNav?.addEventListener('click', (e) => {
     const btn = e.target.closest('.tab');
     if (!btn) return;
@@ -338,5 +372,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTab(tab);
   });
 
+  /* Inicializa com a aba de clientes */
   renderTab('clientes');
 });

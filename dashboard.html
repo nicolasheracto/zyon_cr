@@ -7,9 +7,13 @@
   <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
+  <!-- LAYOUT PRINCIPAL: sidebar fixa à esquerda + conteúdo à direita -->
   <div class="layout">
+    <!-- BARRA LATERAL DE NAVEGAÇÃO (sidebar) -->
     <nav class="sidebar">
+      <!-- Nome da empresa (preenchido dinamicamente via JS) -->
       <div class="sidebar-header js-company-name">Zyon ERP</div>
+      <!-- Lista de links de navegação entre as páginas do sistema -->
       <ul class="nav-list">
         <li><a href="dashboard.html" class="active">📊 Dashboard</a></li>
         <li><a href="cadastros.html">📋 Cadastros</a></li>
@@ -18,25 +22,37 @@
         <li><a href="fiscal.html">📄 Fiscal</a></li>
         <li><a href="relatorios.html">📈 Relatórios</a></li>
         <li><a href="configuracoes.html">⚙️ Configurações</a></li>
+        <!-- Link com classe 'logout' para estilização diferenciada (vermelho) -->
         <li><a href="index.html" class="logout">🚪 Sair</a></li>
       </ul>
     </nav>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
     <main class="main-content">
+      <!-- BARRA SUPERIOR (topbar) com nome da empresa e relógio -->
       <header class="topbar">
         <span class="app-title js-company-name">Zyon ERP</span>
+        <!-- Relógio atualizado a cada segundo via JS (id="clock") -->
         <span id="clock"></span>
       </header>
+
+      <!-- CARDS DE INDICADORES (KPIs) -->
       <section class="kpi-cards">
+        <!-- Cada card exibe um indicador numérico com cor de borda específica -->
         <div class="card card-blue"><h3>Vendas Hoje</h3><p id="kpiSalesToday">R$ 0,00</p></div>
         <div class="card card-green"><h3>Ticket Médio</h3><p id="kpiTicket">R$ 0,00</p></div>
         <div class="card card-yellow"><h3>Estoque Baixo</h3><p id="kpiLowStock">0 itens</p></div>
         <div class="card card-purple"><h3>Clientes Ativos</h3><p id="kpiClients">0</p></div>
       </section>
+
+      <!-- TABELA DAS ÚLTIMAS VENDAS -->
       <section class="table-section">
+        <!-- Cabeçalho da seção com título e botão de atalho -->
         <div class="page-header">
           <h2>Últimas Vendas</h2>
           <button class="btn-primary" onclick="window.location.href='vendas.html'">Nova Venda</button>
         </div>
+        <!-- Tabela preenchida dinamicamente pelo JS (dashboard.js) -->
         <table>
           <thead>
             <tr><th>Cliente</th><th>Valor</th><th>Data</th></tr>
@@ -46,6 +62,8 @@
       </section>
     </main>
   </div>
+
+  <!-- Scripts JavaScript carregados no final para melhor performance -->
   <script src="js/app.js"></script>
   <script src="js/dashboard.js"></script>
 </body>

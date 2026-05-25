@@ -1,14 +1,23 @@
+/* === GESTÃO DE ESTOQUE (estoque.html) ===
+   - Aba "Produtos": cadastro, listagem e ajuste manual de quantidade
+   - Aba "Pedidos": criação, recebimento e cancelamento de pedidos de compra
+   - Ao receber um pedido, as quantidades dos produtos são atualizadas automaticamente */
+
 document.addEventListener('DOMContentLoaded', () => {
   const app = window.ZyonApp;
   app.startClock();
   app.applyBranding();
 
+  /* === REFERÊNCIAS AOS ELEMENTOS DOM === */
+
+  /* Aba Produtos */
   const form = document.getElementById('productForm');
   const tableBody = document.getElementById('stockTableBody');
   const lowCountEl = document.getElementById('lowStockCount');
   const lowStockBadge = document.getElementById('lowStockBadge');
   const settings = app.getData(app.KEYS.settings, app.defaults.settings);
 
+  /* Aba Pedidos */
   const ordersTableBody = document.getElementById('ordersTableBody');
   const modal = document.getElementById('orderModal');
   const modalTitle = document.getElementById('modalTitle');
@@ -19,11 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelOrderBtn = document.getElementById('cancelOrderBtn');
   const btnNewOrder = document.getElementById('btnNewOrder');
 
+  /* Navegação por abas */
   const tabs = document.getElementById('estoqueTabs');
   const tabProdutos = document.getElementById('tabProdutos');
   const tabPedidos = document.getElementById('tabPedidos');
 
-  let editingOrderId = null;
+  let editingOrderId = null; /* ID do pedido sendo editado (null = novo pedido) */
+
+  /* === FUNÇÕES DE ACESSO A DADOS === */
 
   function getProducts() {
     return app.getData(app.KEYS.products, []);
@@ -41,8 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
     app.setData(app.KEYS.stockOrders, orders);
   }
 
+  /* === RENDERIZAÇÃO DA ABA PRODUTOS === */
+
   function renderProducts() {
     const products = getProducts();
+    /* Calcula quantos produtos estão com estoque baixo */
     const lowCount = products.filter((p) => (p.quantidade || 0) <= settings.lowStockThreshold).length;
     if (lowCountEl) lowCountEl.textContent = `${lowCount}`;
     if (lowStockBadge) lowStockBadge.style.display = lowCount > 0 ? 'inline-block' : 'none';
@@ -72,6 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* === RENDERIZAÇÃO DA ABA PEDIDOS === */
+
   function renderOrders() {
     const orders = getOrders();
     ordersTableBody.innerHTML = '';
@@ -80,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    /* Exibe os pedidos do mais recente para o mais antigo */
     orders.slice().reverse().forEach((order) => {
       const tr = document.createElement('tr');
       const itemCount = order.items.reduce((acc, i) => acc + i.quantity, 0);
@@ -103,6 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* === FUNÇÕES DO MODAL DE PEDIDOS === */
+
+  /* Popula os selects de fornecedores (do cadastro) e produtos */
   function populateSelects() {
     const suppliers = app.getData(app.KEYS.suppliers, []).filter((s) => s.status === 'Ativo');
     orderSupplier.innerHTML = '<option value="">Selecione...</option>';
@@ -121,13 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const opt = document.createElement('option');
         opt.value = p.id;
         opt.textContent = p.sku + ' - ' + p.nome + ' (R$ ' + p.preco?.toFixed(2) + ')';
-        opt.dataset.preco = p.preco;
+        opt.dataset.preco = p.preco; /* Armazena o preço para auto-preenchimento */
         sel.appendChild(opt);
       });
       if (current) sel.value = current;
     });
   }
 
+  /* Adiciona uma linha de item no formulário do pedido */
   function addOrderItem(productId, qty, price) {
     const div = document.createElement('div');
     div.className = 'row order-item';
@@ -146,6 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const sel = div.querySelector('.item-product');
       if (sel) sel.value = productId;
     }
+
+    /* Botão para remover esta linha de item (mínimo 1 item) */
     div.querySelector('.remove-item-btn').addEventListener('click', () => {
       if (orderItems.querySelectorAll('.order-item').length <= 1) {
         app.notify('O pedido precisa de pelo menos 1 item.');
@@ -154,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
       div.remove();
     });
 
+    /* Auto-preenche o preço ao selecionar um produto */
     const productSel = div.querySelector('.item-product');
     if (productSel) {
       productSel.addEventListener('change', () => {
@@ -166,13 +191,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* Abre o modal para criar ou editar um pedido */
   function openOrderModal(orderId) {
     editingOrderId = orderId;
     modalTitle.textContent = orderId ? 'Editar Pedido' : 'Novo Pedido de Estoque';
     orderForm.reset();
     orderItems.innerHTML = '';
-    addOrderItem(null, 1, null);
+    addOrderItem(null, 1, null); /* Adiciona primeira linha vazia */
 
+    /* Se for edição, carrega os dados do pedido existente */
     if (orderId) {
       const orders = getOrders();
       const order = orders.find((o) => o.id === orderId);
@@ -189,11 +216,15 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.style.display = 'flex';
   }
 
+  /* Fecha o modal de pedido */
   function closeOrderModal() {
     modal.style.display = 'none';
     editingOrderId = null;
   }
 
+  /* === EVENT LISTENERS === */
+
+  /* Navegação por abas */
   tabs?.addEventListener('click', (e) => {
     const btn = e.target.closest('.tab');
     if (!btn) return;
@@ -209,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tab === 'pedidos') renderOrders();
   });
 
+  /* Cadastro de novo produto (aba Produtos) */
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
     const sku = document.getElementById('sku')?.value.trim();
@@ -229,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
   });
 
+  /* Ajuste manual de estoque (➕, ➖, 🗑️) na tabela de produtos */
   tableBody?.addEventListener('click', (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
@@ -248,11 +281,12 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
   });
 
+  /* Botões do modal de pedido */
   btnNewOrder?.addEventListener('click', () => openOrderModal(null));
   cancelOrderBtn?.addEventListener('click', closeOrderModal);
-
   addItemBtn?.addEventListener('click', () => addOrderItem(null, 1, null));
 
+  /* Submit do formulário de pedido (cria ou edita) */
   orderForm?.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -263,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const supplier = suppliers.find((s) => s.id === supplierId);
     if (!supplier) { app.notify('Fornecedor não encontrado.'); return; }
 
+    /* Coleta os itens do formulário */
     const itemRows = orderItems.querySelectorAll('.order-item');
     const items = [];
     let valid = true;
@@ -292,6 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const now = new Date().toLocaleString('pt-BR');
 
     if (editingOrderId) {
+      /* Edição de pedido existente */
       const idx = orders.findIndex((o) => o.id === editingOrderId);
       if (idx >= 0) {
         orders[idx].supplierId = supplierId;
@@ -301,6 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       app.notify('Pedido atualizado.');
     } else {
+      /* Criação de novo pedido com status "Pendente" */
       orders.push({
         id: crypto.randomUUID(),
         supplierId,
@@ -317,10 +354,12 @@ document.addEventListener('DOMContentLoaded', () => {
     renderOrders();
   });
 
+  /* Fecha modal ao clicar no fundo escuro */
   modal?.addEventListener('click', (e) => {
     if (e.target === modal) closeOrderModal();
   });
 
+  /* Ações na tabela de pedidos: visualizar, receber, cancelar */
   ordersTableBody?.addEventListener('click', (e) => {
     const target = e.target;
     if (!(target instanceof HTMLElement)) return;
@@ -332,6 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const idx = orders.findIndex((o) => o.id === id);
     if (idx < 0) return;
 
+    /* Visualizar detalhes do pedido */
     if (action === 'view') {
       const o = orders[idx];
       let msg = 'Pedido: #' + o.id.slice(0, 8) + '\n';
@@ -346,6 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    /* Receber pedido: atualiza o estoque e marca como "Recebido" */
     if (action === 'receive') {
       if (!confirm('Receber este pedido? O estoque será atualizado.')) return;
       const products = getProducts();
@@ -361,11 +402,12 @@ document.addEventListener('DOMContentLoaded', () => {
       orders[idx].receivedDate = new Date().toLocaleString('pt-BR');
       setOrders(orders);
       app.notify('Pedido recebido! Estoque atualizado.');
-      renderProducts();
+      renderProducts(); /* Atualiza a tabela de produtos com as novas quantidades */
       renderOrders();
       return;
     }
 
+    /* Cancelar pedido: apenas altera o status */
     if (action === 'cancel') {
       if (!confirm('Cancelar este pedido?')) return;
       orders[idx].status = 'Cancelado';
@@ -376,5 +418,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  /* Renderiza a aba Produtos na inicialização */
   renderProducts();
 });

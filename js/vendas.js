@@ -1,13 +1,20 @@
+/* === PDV (PONTO DE VENDA) - vendas.html ===
+   - Gerencia o fluxo completo de venda:
+     seleção de vendedor/cliente, adição de itens, descontos/acréscimos,
+     checkout com múltiplas formas de pagamento e finalização */
+
 document.addEventListener('DOMContentLoaded', () => {
   const app = window.ZyonApp;
   app.startClock();
   app.applyBranding();
 
-  let items = [];
-  let payments = [];
-  let discount = 0;
-  let surcharge = 0;
+  /* Estado interno da venda atual */
+  let items = [];         /* Itens adicionados ao carrinho */
+  let payments = [];      /* Pagamentos registrados */
+  let discount = 0;       /* Valor do desconto em R$ */
+  let surcharge = 0;      /* Valor do acréscimo em R$ */
 
+  /* Referências aos elementos do DOM */
   const seller = document.getElementById('seller');
   const customer = document.getElementById('customer');
   const productSelect = document.getElementById('productSelect');
@@ -15,22 +22,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const tableBody = document.getElementById('items-body');
   const paymentList = document.getElementById('payment-list');
 
+  /* Carrega os vendedores ativos no select */
   function loadSellerOptions() {
     const sellers = app.getData(app.KEYS.sellers, []);
     seller.innerHTML = sellers.map((s) => `<option value="${s.nome}" ${s.status !== 'Ativo' ? 'disabled' : ''}>${s.nome}${s.status !== 'Ativo' ? ' (Inativo)' : ''}</option>`).join('');
     if (!seller.value && sellers.length) seller.value = sellers.find((s) => s.status === 'Ativo')?.nome || sellers[0].nome;
   }
 
+  /* Carrega os clientes ativos no select */
   function loadCustomerOptions() {
     const clients = app.getData(app.KEYS.clients, []).filter((c) => c.status === 'Ativo');
     customer.innerHTML = clients.map((c) => `<option value="${c.nome}">${c.nome}</option>`).join('');
   }
 
+  /* Carrega os produtos com estoque disponível no select */
   function loadProductsOptions() {
     const products = app.getData(app.KEYS.products, []).filter((p) => p.quantidade > 0);
     productSelect.innerHTML = products.map((p) => `<option value="${p.id}">${p.nome} (${p.sku})</option>`).join('');
   }
 
+  /* Renderiza a tabela de itens do carrinho */
   function renderItems() {
     tableBody.innerHTML = '';
     items.forEach((item, index) => {
@@ -46,10 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* Calcula o subtotal (soma de todos os itens sem descontos) */
   function getSubtotal() {
     return items.reduce((sum, item) => sum + item.qty * item.price, 0);
   }
 
+  /* Atualiza todos os totais na interface (subtotal, desconto, acréscimo, total) */
   function updateTotals() {
     const subtotal = getSubtotal();
     const total = subtotal + surcharge - discount;
@@ -61,10 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modal-customer').textContent = customer.value || 'Consumidor Final';
   }
 
+  /* Retorna o total pago até o momento */
   function getTotalPaid() {
     return payments.reduce((sum, p) => sum + p.amount, 0);
   }
 
+  /* Atualiza a lista de pagamentos e o troco no modal de checkout */
   function refreshPayments() {
     paymentList.innerHTML = '';
     payments.forEach((p) => {
@@ -84,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('due-amount').textContent = app.formatCurrency(Math.max(total - paid, 0));
   }
 
+  /* Adiciona um produto ao carrinho, validando estoque */
   function addItem() {
     const productId = productSelect.value;
     const qty = Number(quantityInput.value || 1);
@@ -93,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const product = products.find((p) => p.id === productId);
     if (!product) return;
 
+    /* Verifica se o produto já está no carrinho e calcula quantidade total usada */
     const already = items.find((i) => i.id === product.id);
     const usedQty = already ? already.qty : 0;
     if (usedQty + qty > product.quantidade) {
@@ -100,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    /* Adiciona ou incrementa o item no carrinho */
     if (already) {
       already.qty += qty;
     } else {
@@ -109,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTotals();
   }
 
+  /* Limpa todos os dados da venda atual (novo carrinho) */
   function clearSale() {
     items = [];
     payments = [];
@@ -120,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modal-item-list').innerHTML = '';
   }
 
+  /* Abre o modal de checkout */
   function openModal() {
     const modal = document.getElementById('checkoutModal');
     modal.style.display = 'flex';
@@ -142,10 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshPayments();
   }
 
+  /* Fecha o modal de checkout */
   function closeModal() {
     document.getElementById('checkoutModal').style.display = 'none';
   }
 
+  /* Adiciona um pagamento (preenche o valor restante automaticamente) */
   function addPayment(method) {
     const total = getSubtotal() + surcharge - discount;
     const paid = getTotalPaid();
@@ -158,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshPayments();
   }
 
+  /* Finaliza a venda: salva no localStorage, atualiza estoque e limpa o carrinho */
   function finalizeSale() {
     const total = getSubtotal() + surcharge - discount;
     if (!items.length || total <= 0) {
@@ -170,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    /* Salva a venda */
     const sales = app.getData(app.KEYS.sales, []);
     sales.push({
       id: crypto.randomUUID(),
@@ -183,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     app.setData(app.KEYS.sales, sales);
 
+    /* Atualiza o estoque (diminui a quantidade dos produtos vendidos) */
     const products = app.getData(app.KEYS.products, []);
     items.forEach((item) => {
       const product = products.find((p) => p.id === item.id);
@@ -193,8 +218,10 @@ document.addEventListener('DOMContentLoaded', () => {
     app.notify('Venda finalizada com sucesso.');
     closeModal();
     clearSale();
-    loadProductsOptions();
+    loadProductsOptions(); /* Recarrega produtos para refletir novo estoque */
   }
+
+  /* === EVENT LISTENERS === */
 
   document.getElementById('addItemBtn')?.addEventListener('click', addItem);
   document.getElementById('applyDiscountBtn')?.addEventListener('click', () => {
@@ -216,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('payDebitBtn')?.addEventListener('click', () => addPayment('Débito'));
   document.getElementById('payCreditBtn')?.addEventListener('click', () => addPayment('Crédito'));
 
+  /* Remove item do carrinho ao clicar no X */
   tableBody.addEventListener('click', (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement) || !target.classList.contains('remove-item-btn')) return;
@@ -225,11 +253,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTotals();
   });
 
+  /* Fecha modal ao clicar fora do conteúdo */
   window.addEventListener('click', (event) => {
     const modal = document.getElementById('checkoutModal');
     if (event.target === modal) closeModal();
   });
 
+  /* Inicialização: carrega selects e limpa venda */
   loadSellerOptions();
   loadCustomerOptions();
   loadProductsOptions();

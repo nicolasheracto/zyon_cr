@@ -1,13 +1,19 @@
+/* === PAINEL PRINCIPAL (Dashboard) ===
+   - Calcula e exibe KPIs (indicadores do dia)
+   - Lista as 5 vendas mais recentes */
+
 document.addEventListener('DOMContentLoaded', () => {
   const app = window.ZyonApp;
   app.startClock();
   app.applyBranding();
 
+  /* Carrega todos os dados necessários */
   const clients = app.getData(app.KEYS.clients, []);
   const products = app.getData(app.KEYS.products, []);
   const sales = app.getData(app.KEYS.sales, []);
   const settings = app.getData(app.KEYS.settings, app.defaults.settings);
 
+  /* Filtra vendas do dia atual comparando a data */
   const today = new Date().toLocaleDateString('pt-BR');
   const salesToday = sales.filter((sale) => (sale.date || '').includes(today));
   const totalToday = app.sumSalesTotal(salesToday);
@@ -15,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const lowStock = products.filter((p) => (p.quantidade || 0) <= settings.lowStockThreshold).length;
   const activeClients = clients.filter((c) => c.status === 'Ativo').length;
 
+  /* Atualiza os elementos dos KPIs no HTML */
   const kpiSalesToday = document.getElementById('kpiSalesToday');
   const kpiTicket = document.getElementById('kpiTicket');
   const kpiLowStock = document.getElementById('kpiLowStock');
@@ -25,11 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (kpiLowStock) kpiLowStock.textContent = `${lowStock} itens`;
   if (kpiClients) kpiClients.textContent = `${activeClients}`;
 
+  /* Preenche a tabela de últimas vendas (5 mais recentes) */
   const latestSalesBody = document.getElementById('latestSalesBody');
   if (!latestSalesBody) return;
 
   latestSalesBody.innerHTML = '';
-  const recent = [...sales].slice(-5).reverse();
+  const recent = [...sales].slice(-5).reverse(); /* Últimas 5, ordem decrescente */
   if (!recent.length) {
     latestSalesBody.innerHTML = '<tr><td colspan="3">Nenhuma venda registrada ainda.</td></tr>';
     return;

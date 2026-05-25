@@ -14,6 +14,7 @@
         <li><a href="dashboard.html">📊 Dashboard</a></li>
         <li><a href="cadastros.html">📋 Cadastros</a></li>
         <li><a href="vendas.html">🛒 Vendas</a></li>
+        <!-- Aba Estoque ativa: módulo de gestão de estoque e pedidos -->
         <li><a href="estoque.html" class="active">📦 Estoque</a></li>
         <li><a href="fiscal.html">📄 Fiscal</a></li>
         <li><a href="relatorios.html">📈 Relatórios</a></li>
@@ -21,21 +22,30 @@
         <li><a href="index.html" class="logout">🚪 Sair</a></li>
       </ul>
     </nav>
+
     <main class="main-content">
       <header class="topbar">
         <span class="app-title">Estoque - <span class="js-company-name">Zyon ERP</span></span>
         <span id="clock"></span>
       </header>
+
+      <!-- CABEÇALHO: título + badge de alerta para estoque baixo -->
       <div class="page-header">
         <h1>Gestão de Estoque</h1>
+        <!-- Badge vermelho que aparece apenas quando há produtos com quantidade abaixo do limite -->
         <div class="status-badge status-inactive" id="lowStockBadge">Baixo estoque: <span id="lowStockCount">0</span></div>
       </div>
+
+      <!-- NAVEGAÇÃO POR ABAS: Produtos (gestão de itens) e Pedidos (recepção de mercadorias) -->
       <div class="tabs" id="estoqueTabs">
         <button class="tab active" data-tab="produtos">Produtos</button>
         <button class="tab" data-tab="pedidos">Pedidos</button>
       </div>
+
       <div id="tabContent">
+        <!-- ABA PRODUTOS: formulário de cadastro + tabela de produtos -->
         <div id="tabProdutos">
+          <!-- FORMULÁRIO DE CADASTRO DE PRODUTO -->
           <div class="main-area" style="margin-bottom: 1.5rem;">
             <form id="productForm">
               <div class="row">
@@ -63,6 +73,8 @@
               </div>
             </form>
           </div>
+
+          <!-- TABELA DE PRODUTOS COM ESTOQUE -->
           <table>
             <thead>
               <tr>
@@ -77,11 +89,16 @@
             <tbody id="stockTableBody"></tbody>
           </table>
         </div>
+
+        <!-- ABA PEDIDOS: gestão de pedidos de compra/reposição de estoque -->
         <div id="tabPedidos" style="display:none">
           <div class="page-header" style="margin-bottom:1.5rem">
             <h2>Pedidos de Estoque</h2>
+            <!-- Botão abre o modal para criar um novo pedido de compra -->
             <button class="btn-primary" id="btnNewOrder">+ Novo Pedido</button>
           </div>
+
+          <!-- TABELA DE PEDIDOS: lista todos os pedidos com status e ações -->
           <div class="table-card">
             <table>
               <thead>
@@ -103,19 +120,24 @@
     </main>
   </div>
 
+  <!-- MODAL DE PEDIDO: usado para criar ou editar pedidos de estoque -->
   <div class="modal" id="orderModal">
     <div class="modal-content" style="max-width:700px">
       <h2 id="modalTitle">Novo Pedido de Estoque</h2>
       <form id="orderForm">
+        <!-- SELEÇÃO DO FORNECEDOR (carregado dos cadastros) -->
         <div class="form-group">
           <label for="orderSupplier">Fornecedor *</label>
           <select id="orderSupplier" required>
             <option value="">Selecione...</option>
           </select>
         </div>
+
+        <!-- LISTA DE ITENS DO PEDIDO (dinâmica: é possível adicionar/remover linhas) -->
         <div class="form-group">
           <label>Itens do Pedido</label>
           <div id="orderItems">
+            <!-- Linha padrão de item: select de produto + quantidade + preço unitário + botão remover -->
             <div class="row order-item" style="align-items:center">
               <select class="item-product" style="flex:2;padding:0.75rem;border:1px solid var(--border);border-radius:8px" required>
                 <option value="">Selecione o produto...</option>
@@ -127,6 +149,8 @@
           </div>
           <button type="button" class="btn-secondary" id="addItemBtn" style="margin-top:0.5rem">+ Adicionar Item</button>
         </div>
+
+        <!-- BOTÕES DO MODAL: cancelar ou salvar o pedido -->
         <div class="modal-actions">
           <button type="button" class="btn-secondary" id="cancelOrderBtn">Cancelar</button>
           <button type="submit" class="btn-primary">Salvar Pedido</button>
