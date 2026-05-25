@@ -1,7 +1,8 @@
 /* === TELA DE CADASTROS UNIFICADA (cadastros.html) ===
-   - Gerencia 4 entidades com abas: Clientes, Produtos, Vendedores, Fornecedores
+   - Gerencia 3 entidades com abas: Clientes, Vendedores, Fornecedores
+   - Produtos são cadastrados no módulo Estoque
    - Cada entidade possui: busca textual, formulário de cadastro inline e tabela com ações
-   - As ações incluem: visualizar, editar, ativar/inativar (ou excluir para produtos)
+   - As ações incluem: visualizar, editar, ativar/inativar
    - Arquitetura genérica: a config (entities) define campos, renderização e regras */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabContent = document.getElementById('tabContent');
 
   /* Configuração de cada entidade: chave, label, campos, renderização e regras */
+  /* Produtos são cadastrados no módulo Estoque */
   const entities = {
     clientes: {
       key: app.KEYS.clients,
@@ -45,39 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tipo: 'pf'
       }),
       columns: ['Cliente / Contato', 'CPF / CNPJ', 'Status', 'Ações']
-    },
-    produtos: {
-      key: app.KEYS.products,
-      label: 'Produto',
-      fields: [
-        { id: 'sku', label: 'SKU *', type: 'text', required: true, placeholder: 'Ex: P001' },
-        { id: 'nomeProduto', label: 'Produto *', type: 'text', required: true, placeholder: 'Ex: Arroz 5kg' },
-        { id: 'precoProduto', label: 'Preço *', type: 'number', required: true, step: '0.01', min: '0.01' },
-        { id: 'qtdProduto', label: 'Quantidade', type: 'number', required: false, min: '0' }
-      ],
-      renderRow: (item, settings) => {
-        const threshold = settings?.lowStockThreshold ?? 10;
-        const isLow = (item.quantidade || 0) <= threshold;
-        return `
-          <td>${item.sku}</td>
-          <td>${item.nome}</td>
-          <td>${app.formatCurrency(item.preco)}</td>
-          <td>${item.quantidade || 0}</td>
-          <td>${isLow ? '<span class="status-badge status-inactive">Baixo</span>' : '<span class="status-badge status-active">OK</span>'}</td>
-          <td class="action-btns">
-            <span title="Editar" data-action="edit" data-id="${item.id}">✏️</span>
-            <span title="Excluir" data-action="remove" data-id="${item.id}">🗑️</span>
-          </td>`;
-      },
-      getSearchText: (item) => [item.sku, item.nome].join(' ').toLowerCase(),
-      buildItem: (form) => ({
-        id: crypto.randomUUID(),
-        sku: form.sku.trim(),
-        nome: form.nomeProduto.trim(),
-        preco: Number(form.precoProduto || 0),
-        quantidade: Number(form.qtdProduto || 0)
-      }),
-      columns: ['SKU', 'Produto', 'Preço', 'Qtd', 'Status', 'Ações']
     },
     vendedores: {
       key: app.KEYS.sellers,
