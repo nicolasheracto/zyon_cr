@@ -63,17 +63,26 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'contatoVendedor', label: 'Contato', type: 'text', required: false },
         { id: 'comissaoVendedor', label: 'Comissão (%)', type: 'number', required: false, min: '0', max: '100', step: '0.1' }
       ],
-      renderRow: (item) => {
+      renderRow: (item, ctx) => {
         const active = item.status === 'Ativo';
+        const canDelete = ctx?.canDeleteSeller ? ctx.canDeleteSeller(item.nome) : true;
+        const nome = app.escapeHtml(item.nome);
+        const contato = app.escapeHtml(item.contato || '-');
+        const documento = app.escapeHtml(item.documento || '-');
+        const status = app.escapeHtml(item.status);
+        const comissao = item.comissao != null ? app.escapeHtml(item.comissao) + '%' : '-';
         return `
-          <td><strong style="color:var(--text-dark);display:block;font-size:1rem">${item.nome}</strong><span style="font-size:0.85rem;color:var(--text-light)">${item.contato || '-'}</span></td>
-          <td style="color:var(--text-light)">${item.documento || '-'}</td>
-          <td>${item.comissao != null ? item.comissao + '%' : '-'}</td>
-          <td><span class="status-badge ${active ? 'status-active' : 'status-inactive'}">${item.status}</span></td>
+          <td><strong style="color:var(--text-dark);display:block;font-size:1rem">${nome}</strong><span style="font-size:0.85rem;color:var(--text-light)">${contato}</span></td>
+          <td style="color:var(--text-light)">${documento}</td>
+          <td>${comissao}</td>
+          <td><span class="status-badge ${active ? 'status-active' : 'status-inactive'}">${status}</span></td>
           <td class="action-btns">
             <span title="Visualizar" data-action="view" data-id="${item.id}">👁️</span>
             <span title="Editar" data-action="edit" data-id="${item.id}">✏️</span>
             <span title="${active ? 'Inativar' : 'Ativar'}" data-action="toggle" data-id="${item.id}">${active ? '🚫' : '✅'}</span>
+            ${canDelete
+              ? `<span title="Excluir" data-action="delete" data-id="${item.id}">🗑️</span>`
+              : `<span class="action-disabled" title="Vendedor com vendas vinculadas — exclusão bloqueada">🗑️</span>`}
           </td>`;
       },
       getSearchText: (item) => [item.nome, item.documento, item.contato].join(' ').toLowerCase(),
@@ -225,6 +234,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return !app.clientHasLinkedSales(nome);
           }
         }
+      : tab === 'vendedores'
+      ? {
+          canDeleteSeller: (nome) => {
+            if (typeof app.sellerHasLinkedSales !== 'function') return true;
+            return !app.sellerHasLinkedSales(nome);
+          }
+        }
       : {};
 
     if (!filtered.length) {
@@ -351,19 +367,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (action === 'delete') {
-          if (tab !== 'clientes') return;
+          if (tab === 'clientes') {
+            const client = items[idx];
+            if (app.clientHasLinkedSales(client.nome)) {
+              app.notify('Não é possível excluir: existem vendas vinculadas a este cliente.');
+              return;
+            }
 
-          const client = items[idx];
-          if (app.clientHasLinkedSales(client.nome)) {
-            app.notify('Não é possível excluir: existem vendas vinculadas a este cliente.');
-            return;
+            if (!confirm(`Excluir o cliente "${client.nome}" permanentemente?`)) return;
+            items.splice(idx, 1);
+            saveTabData(tab, items);
+            app.notify('Cliente excluído.');
+            renderTab(tab);
+          } else if (tab === 'vendedores') {
+            const seller = items[idx];
+            if (app.sellerHasLinkedSales(seller.nome)) {
+              app.notify('Não é possível excluir: existem vendas vinculadas a este vendedor.');
+              return;
+            }
+
+            if (!confirm(`Excluir o vendedor "${seller.nome}" permanentemente?`)) return;
+            items.splice(idx, 1);
+            saveTabData(tab, items);
+            app.notify('Vendedor excluído.');
+            renderTab(tab);
           }
-
-          if (!confirm(`Excluir o cliente "${client.nome}" permanentemente?`)) return;
-          items.splice(idx, 1);
-          saveTabData(tab, items);
-          app.notify('Cliente excluído.');
-          renderTab(tab);
         }
       });
     }

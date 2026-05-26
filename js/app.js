@@ -206,6 +206,13 @@
     return list.some((sale) => String(sale.customer ?? '').trim() === name);
   }
 
+  function sellerHasLinkedSales(sellerName, sales = null) {
+    const list = sales ?? getData(KEYS.sales, []);
+    if (!Array.isArray(list)) return false;
+    const name = String(sellerName ?? '').trim();
+    return list.some((sale) => String(sale.seller ?? '').trim() === name);
+  }
+
   function canReverseStockReceipt(order, products) {
     if (!order || order.status !== 'Recebido') return { ok: true };
 
@@ -255,6 +262,7 @@
     renderTable,
     loadStore,
     clientHasLinkedSales,
+    sellerHasLinkedSales,
     canReverseStockReceipt
   };
 })();
