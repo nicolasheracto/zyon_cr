@@ -141,6 +141,8 @@
         sellersTotal: sellers.length,
         suppliersTotal: suppliers.length,
         fiscalNotesTotal: fiscalNotes.length,
+        fiscalNotesAuthorized: fiscalNotes.filter((n) => (n.status || 'Autorizada') === 'Autorizada').length,
+        fiscalNotesCancelled: fiscalNotes.filter((n) => n.status === 'Cancelada').length,
         revenueToday,
         salesTodayCount: salesToday.length
       },
@@ -166,6 +168,8 @@
         pendingStockOrders: stockOrders.filter((o) => o.status !== 'Recebido').length,
         stockOrdersTotal: stockOrders.length,
         fiscalNotesTotal: fiscalNotes.length,
+        fiscalNotesAuthorized: fiscalNotes.filter((n) => (n.status || 'Autorizada') === 'Autorizada').length,
+        fiscalNotesCancelled: fiscalNotes.filter((n) => n.status === 'Cancelada').length,
         suppliersActive: suppliers.filter((s) => s.status === 'Ativo').length
       }
     };

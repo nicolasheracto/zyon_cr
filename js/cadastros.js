@@ -23,8 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'contato', label: 'Contato', type: 'text', required: false }
       ],
       /* Renderiza uma linha da tabela para um item */
-      renderRow: (item) => {
+      renderRow: (item, ctx) => {
         const active = item.status === 'Ativo';
+        const canDelete = ctx?.canDeleteClient?.(item.nome);
         return `
           <td><strong style="color:var(--text-dark);display:block;font-size:1rem">${item.nome}</strong><span style="font-size:0.85rem;color:var(--text-light)">${item.contato || '-'}</span></td>
           <td style="color:var(--text-light)">${item.documento || '-'}</td>
@@ -33,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <span title="Visualizar" data-action="view" data-id="${item.id}">👁️</span>
             <span title="Editar" data-action="edit" data-id="${item.id}">✏️</span>
             <span title="${active ? 'Inativar' : 'Ativar'}" data-action="toggle" data-id="${item.id}">${active ? '🚫' : '✅'}</span>
+            ${canDelete
+              ? `<span title="Excluir" data-action="delete" data-id="${item.id}">🗑️</span>`
+              : `<span class="action-disabled" title="Cliente com vendas vinculadas — exclusão bloqueada">🗑️</span>`}
           </td>`;
       },
       getSearchText: (item) => [item.nome, item.documento, item.contato].join(' ').toLowerCase(),
@@ -207,11 +211,15 @@ document.addEventListener('DOMContentLoaded', () => {
     cfg.columns.forEach((col) => { html += '<th>' + col + '</th>'; });
     html += '  </tr></thead><tbody id="tbody-' + tab + '">';
 
+    const rowCtx = tab === 'clientes'
+      ? { canDeleteClient: (nome) => !app.clientHasLinkedSales(nome) }
+      : {};
+
     if (!filtered.length) {
       html += '<tr><td colspan="' + cfg.columns.length + '">Nenhum ' + cfg.label.toLowerCase() + ' encontrado.</td></tr>';
     } else {
       filtered.forEach((item) => {
-        html += '<tr data-id="' + item.id + '">' + cfg.renderRow(item, settings) + '</tr>';
+        html += '<tr data-id="' + item.id + '">' + cfg.renderRow(item, rowCtx) + '</tr>';
       });
     }
 
@@ -330,12 +338,19 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        /* Excluir (apenas para produtos) */
-        if (action === 'remove') {
-          if (!confirm('Excluir ' + cfg.label.toLowerCase() + ' "' + items[idx].nome + '"?')) return;
+        if (action === 'delete') {
+          if (tab !== 'clientes') return;
+
+          const client = items[idx];
+          if (app.clientHasLinkedSales(client.nome)) {
+            app.notify('Não é possível excluir: existem vendas vinculadas a este cliente.');
+            return;
+          }
+
+          if (!confirm(`Excluir o cliente "${client.nome}" permanentemente?`)) return;
           items.splice(idx, 1);
           setData(tab, items);
-          app.notify(cfg.label + ' excluído.');
+          app.notify('Cliente excluído.');
           renderTab(tab);
         }
       });

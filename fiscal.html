@@ -33,21 +33,50 @@
 
       <section class="kpi-cards">
         <div class="card card-blue"><h3>Notas autorizadas</h3><p id="fiscalKpiNotes">0</p></div>
+        <div class="card card-purple"><h3>Notas canceladas</h3><p id="fiscalKpiCancelled">0</p></div>
         <div class="card card-yellow"><h3>Vendas sem NF-e</h3><p id="fiscalKpiPending">0</p></div>
-        <div class="card card-green"><h3>Valor emitido</h3><p id="fiscalKpiTotal">R$ 0,00</p></div>
+        <div class="card card-green"><h3>Valor autorizado</h3><p id="fiscalKpiTotal">R$ 0,00</p></div>
       </section>
 
       <div class="section-card">
-        <h2>Emitir NF-e (simulação)</h2>
+        <div class="page-header" style="margin-bottom:1rem">
+          <h2>Emitir NF-e (simulação)</h2>
+          <button type="button" class="btn-secondary" id="openFiscalConfigBtn">⚙️ Configurações do emitente</button>
+        </div>
         <div class="row">
           <div class="form-group" style="flex:2">
             <label for="salesSelect">Venda pendente de documento fiscal</label>
             <select id="salesSelect"></select>
           </div>
-          <div class="form-group" style="display:flex;align-items:flex-end;gap:0.5rem;flex-wrap:wrap">
-            <button id="previewNoteBtn" class="btn-secondary" type="button">Pré-visualizar DANFE</button>
-            <button id="emitNoteBtn" class="btn-primary" type="button" disabled>Transmitir à SEFAZ</button>
+        </div>
+
+        <div id="noteEmissionFields" hidden>
+          <div class="form-group">
+            <label for="noteNatureza">Natureza da operação desta nota *</label>
+            <input id="noteNatureza" type="text" maxlength="60" placeholder="Ex.: Venda de mercadoria adquirida de terceiros">
+            <p class="field-hint">Obrigatório por nota (10 a 60 caracteres). Varia conforme o tipo de operação.</p>
           </div>
+          <div class="form-group">
+            <label>CFOP por item (desta nota)</label>
+            <div class="table-card">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Qtd</th>
+                    <th>CFOP *</th>
+                  </tr>
+                </thead>
+                <tbody id="noteItemsCfopBody"></tbody>
+              </table>
+            </div>
+            <p class="field-hint">CFOP de 4 dígitos por linha (ex.: 5102 venda interna, 6102 venda interestadual).</p>
+          </div>
+        </div>
+
+        <div class="form-group" style="display:flex;align-items:flex-end;gap:0.5rem;flex-wrap:wrap;margin-top:1rem">
+          <button id="previewNoteBtn" class="btn-secondary" type="button" disabled>Pré-visualizar DANFE</button>
+          <button id="emitNoteBtn" class="btn-primary" type="button" disabled>Transmitir à SEFAZ</button>
         </div>
         <p class="field-hint">A transmissão é simulada: gera chave de acesso, protocolo e XML fictício para fins didáticos.</p>
       </div>
@@ -110,6 +139,41 @@
     </main>
   </div>
 
+  <div class="modal" id="fiscalConfigModal">
+    <div class="modal-content" style="max-width:640px">
+      <h2>Configurações do emitente NF-e</h2>
+      <p class="field-hint" style="margin-bottom:1rem">Dados da empresa emissora. CFOP e natureza da operação são definidos em cada nota.</p>
+      <form id="fiscalConfigForm">
+        <div class="form-group">
+          <label for="cfgRazao">Razão social *</label>
+          <input id="cfgRazao" type="text" required>
+        </div>
+        <div class="row" style="flex-wrap:wrap">
+          <div class="form-group" style="flex:1;min-width:180px">
+            <label for="cfgCnpj">CNPJ *</label>
+            <input id="cfgCnpj" type="text" placeholder="00.000.000/0001-00" required>
+          </div>
+          <div class="form-group" style="flex:1;min-width:140px">
+            <label for="cfgIe">Inscrição estadual *</label>
+            <input id="cfgIe" type="text" required>
+          </div>
+          <div class="form-group" style="flex:0.4;min-width:80px">
+            <label for="cfgSerie">Série *</label>
+            <input id="cfgSerie" type="text" maxlength="3" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cfgEndereco">Endereço completo *</label>
+          <input id="cfgEndereco" type="text" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="closeFiscalConfigBtn">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar emitente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="modal" id="transmitModal">
     <div class="modal-content fiscal-transmit-modal">
       <h2>Transmissão NF-e</h2>
@@ -126,12 +190,36 @@
     </div>
   </div>
 
+  <div class="modal" id="cancelNoteModal">
+    <div class="modal-content fiscal-transmit-modal">
+      <h2>Cancelar NF-e</h2>
+      <p class="field-hint" id="cancelNoteSummary"></p>
+      <div class="form-group">
+        <label for="cancelJustification">Justificativa do cancelamento *</label>
+        <textarea id="cancelJustification" rows="4" maxlength="255"
+          placeholder="Informe o motivo (mín. 15 caracteres). Ex.: Venda devolvida pelo cliente."></textarea>
+      </div>
+      <ul class="transmit-steps" id="cancelSteps">
+        <li data-step="validate">Validando evento de cancelamento...</li>
+        <li data-step="sign">Assinando evento XML...</li>
+        <li data-step="send">Enviando cancelamento à SEFAZ (simulação)...</li>
+        <li data-step="done">Registrando protocolo de cancelamento...</li>
+      </ul>
+      <p id="cancelResult" class="transmit-result" hidden></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="closeCancelModalBtn">Fechar</button>
+        <button type="button" class="btn-red" id="confirmCancelBtn">Confirmar cancelamento</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="noteDetailModal">
     <div class="modal-content" style="max-width:900px;max-height:90vh;overflow:auto">
       <h2>Detalhes da NF-e</h2>
       <div id="noteDetailContent"></div>
       <div class="modal-actions">
         <button type="button" class="btn-secondary" id="closeNoteDetailBtn">Fechar</button>
+        <button type="button" class="btn-red" id="cancelFromDetailBtn" hidden>Cancelar NF-e</button>
       </div>
     </div>
   </div>

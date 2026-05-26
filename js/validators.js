@@ -175,14 +175,86 @@
     return result(errors.length === 0, errors);
   }
 
+  function isValidCfop(cfop) {
+    const code = String(cfop ?? '').trim();
+    if (!/^[1-7]\d{3}$/.test(code)) return false;
+    if (code === '0000') return false;
+    return true;
+  }
+
+  function validateNaturezaOperacao(value) {
+    const text = String(value ?? '').trim();
+    const errors = [];
+    if (text.length < 10) errors.push('Natureza da operação deve ter pelo menos 10 caracteres.');
+    if (text.length > 60) errors.push('Natureza da operação: máximo 60 caracteres.');
+    return result(errors.length === 0, errors);
+  }
+
+  function validateFiscalEmitter(emitter) {
+    const errors = [];
+    const razao = String(emitter?.razaoSocial ?? '').trim();
+    const cnpj = String(emitter?.cnpj ?? '').trim();
+    const ie = String(emitter?.ie ?? '').trim();
+    const endereco = String(emitter?.endereco ?? '').trim();
+    const serie = String(emitter?.serie ?? '').trim();
+
+    if (razao.length < 3) errors.push('Informe a razão social do emitente.');
+    if (!isValidCNPJ(cnpj)) errors.push('CNPJ do emitente inválido.');
+    if (ie.length < 3) errors.push('Informe a inscrição estadual do emitente.');
+    if (endereco.length < 5) errors.push('Informe o endereço completo do emitente.');
+    if (!serie || !/^\d{1,3}$/.test(serie)) errors.push('Série da NF-e deve ser numérica (1 a 3 dígitos).');
+
+    return result(errors.length === 0, errors);
+  }
+
+  function validateCancelJustification(value) {
+    const text = String(value ?? '').trim();
+    const errors = [];
+    if (text.length < 15) {
+      errors.push('Justificativa do cancelamento deve ter pelo menos 15 caracteres.');
+    }
+    if (text.length > 255) {
+      errors.push('Justificativa do cancelamento: máximo 255 caracteres.');
+    }
+    return result(errors.length === 0, errors);
+  }
+
+  function validateNoteEmission(noteData, sale) {
+    const errors = [];
+    const naturezaCheck = validateNaturezaOperacao(noteData?.naturezaOperacao);
+    if (!naturezaCheck.ok) errors.push(...naturezaCheck.errors);
+
+    const items = sale?.items || [];
+    if (!items.length) errors.push('A venda não possui itens para emissão.');
+
+    const cfops = noteData?.itemCfops || [];
+    if (cfops.length !== items.length) {
+      errors.push('Informe o CFOP de todos os itens da nota.');
+    }
+
+    items.forEach((item, index) => {
+      const cfop = cfops[index];
+      if (!isValidCfop(cfop)) {
+        errors.push(`CFOP inválido no item "${item.name}". Use 4 dígitos (ex.: 5102, 6102).`);
+      }
+    });
+
+    return result(errors.length === 0, errors);
+  }
+
   window.ZyonValidators = {
     onlyDigits,
     isValidCPF,
     isValidCNPJ,
     isValidDocument,
+    isValidCfop,
     validateClient,
     validateSeller,
     validateSupplier,
-    validateProduct
+    validateProduct,
+    validateNaturezaOperacao,
+    validateFiscalEmitter,
+    validateNoteEmission,
+    validateCancelJustification
   };
 })();

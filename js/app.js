@@ -10,7 +10,8 @@
     products: 'zyon_products',       /* Produtos em estoque */
     sales: 'zyon_sales',             /* Vendas realizadas */
     fiscalNotes: 'zyon_fiscal_notes',/* Notas fiscais emitidas */
-    settings: 'zyon_settings',       /* Configurações do sistema */
+    fiscalConfig: 'zyon_fiscal_config', /* Emitente NF-e (tela fiscal) */
+    settings: 'zyon_settings',       /* Configurações gerais do sistema */
     sellers: 'zyon_sellers',         /* Vendedores cadastrados */
     suppliers: 'zyon_suppliers',     /* Fornecedores cadastrados */
     stockOrders: 'zyon_stock_orders' /* Pedidos de reposição de estoque */
@@ -20,16 +21,14 @@
   const defaults = {
     settings: {
       companyName: 'Zyon ERP',
-      lowStockThreshold: 10,
-      fiscal: {
-        razaoSocial: 'Zyon Comércio Ltda',
-        cnpj: '12.345.678/0001-90',
-        ie: '123.456.789.012',
-        endereco: 'Av. Comercial, 1000 - Centro - São Paulo/SP',
-        serie: '1',
-        naturezaOperacao: 'Venda de mercadoria adquirida de terceiros',
-        cfopPadrao: '5102'
-      }
+      lowStockThreshold: 10
+    },
+    fiscalConfig: {
+      razaoSocial: 'Zyon Comércio Ltda',
+      cnpj: '12.345.678/0001-90',
+      ie: '123.456.789.012',
+      endereco: 'Av. Comercial, 1000 - Centro - São Paulo/SP',
+      serie: '1'
     },
     clients: [
       {
@@ -86,14 +85,17 @@
 
   /* Garante que os dados padrão sejam salvos na primeira execução */
   function ensureSeedData() {
-    if (!localStorage.getItem(KEYS.settings)) {
-      setData(KEYS.settings, defaults.settings);
-    } else {
+    if (!localStorage.getItem(KEYS.settings)) setData(KEYS.settings, defaults.settings);
+    if (!localStorage.getItem(KEYS.fiscalConfig)) {
       const settings = getData(KEYS.settings, defaults.settings);
-      if (!settings.fiscal) {
-        settings.fiscal = { ...defaults.settings.fiscal };
-        setData(KEYS.settings, settings);
-      }
+      const legacy = settings.fiscal || {};
+      setData(KEYS.fiscalConfig, {
+        razaoSocial: legacy.razaoSocial || defaults.fiscalConfig.razaoSocial,
+        cnpj: legacy.cnpj || defaults.fiscalConfig.cnpj,
+        ie: legacy.ie || defaults.fiscalConfig.ie,
+        endereco: legacy.endereco || defaults.fiscalConfig.endereco,
+        serie: legacy.serie || defaults.fiscalConfig.serie
+      });
     }
     if (!localStorage.getItem(KEYS.clients)) setData(KEYS.clients, defaults.clients);
     if (!localStorage.getItem(KEYS.products)) setData(KEYS.products, defaults.products);
@@ -192,6 +194,41 @@
     };
   }
 
+  function clientHasLinkedSales(clientName, sales = null) {
+    const list = sales ?? getData(KEYS.sales, []);
+    const name = String(clientName ?? '').trim();
+    return list.some((sale) => String(sale.customer ?? '').trim() === name);
+  }
+
+  function canReverseStockReceipt(order, products) {
+    if (!order || order.status !== 'Recebido') return { ok: true };
+
+    for (const item of order.items || []) {
+      const prod = products.find((p) => p.id === item.productId);
+      if (!prod) {
+        return { ok: false, message: 'Produto do pedido não encontrado no estoque.' };
+      }
+
+      const qtyReceived = item.qtyReceived ?? item.quantity ?? 0;
+      if (item.qtyBeforeReceive == null) {
+        return {
+          ok: false,
+          message: `Pedido #${order.id.slice(0, 8)}: recepção sem rastreio. Não é possível excluir com segurança.`
+        };
+      }
+
+      const expectedQty = item.qtyBeforeReceive + qtyReceived;
+      if (prod.quantidade !== expectedQty) {
+        return {
+          ok: false,
+          message: `Houve movimentação no estoque de "${prod.nome}". Exclusão da recepção não permitida.`
+        };
+      }
+    }
+
+    return { ok: true };
+  }
+
   /* Popula dados iniciais se necessário */
   ensureSeedData();
 
@@ -210,6 +247,8 @@
     initPage,
     setText,
     renderTable,
-    loadStore
+    loadStore,
+    clientHasLinkedSales,
+    canReverseStockReceipt
   };
 })();

@@ -96,11 +96,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* Exibe os pedidos do mais recente para o mais antigo */
+    const products = getProducts();
+
     orders.slice().reverse().forEach((order) => {
       const tr = document.createElement('tr');
       const itemCount = order.items.reduce((acc, i) => acc + i.quantity, 0);
       const total = order.items.reduce((acc, i) => acc + (i.quantity * i.unitPrice), 0);
       const isPending = order.status === 'Pendente';
+      const reverseCheck = app.canReverseStockReceipt(order, products);
+      const canDelete = order.status !== 'Recebido' || reverseCheck.ok;
+      const deleteTitle = canDelete
+        ? 'Excluir pedido'
+        : reverseCheck.message || 'Exclusão bloqueada: houve movimentação no estoque';
 
       tr.innerHTML = `
         <td><strong>#${order.id.slice(0, 8)}</strong></td>
@@ -112,7 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="action-btns">
           ${isPending ? '<span title="Receber" data-action="receive" data-id="' + order.id + '">✅ Receber</span>' : ''}
           ${isPending ? '<span title="Cancelar" data-action="cancel" data-id="' + order.id + '">🚫 Cancelar</span>' : ''}
-          <span title="Excluir" data-action="delete" data-id="${order.id}">🗑️</span>
+          ${canDelete
+            ? `<span title="${app.escapeHtml(deleteTitle)}" data-action="delete" data-id="${order.id}">🗑️</span>`
+            : `<span class="action-disabled" title="${app.escapeHtml(deleteTitle)}">🗑️</span>`}
           <span title="Visualizar" data-action="view" data-id="${order.id}">👁️</span>
         </td>
       `;
@@ -397,7 +406,9 @@ document.addEventListener('DOMContentLoaded', () => {
       order.items.forEach((item) => {
         const prod = products.find((p) => p.id === item.productId);
         if (prod) {
-          prod.quantidade = (prod.quantidade || 0) + item.quantity;
+          item.qtyBeforeReceive = prod.quantidade || 0;
+          item.qtyReceived = item.quantity;
+          prod.quantidade = item.qtyBeforeReceive + item.qtyReceived;
         }
       });
       setProducts(products);
@@ -420,20 +431,28 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    /* Excluir pedido (estorna estoque se já recebido) */
     if (action === 'delete') {
       const order = orders[idx];
+      const products = getProducts();
+      const reverseCheck = app.canReverseStockReceipt(order, products);
+
+      if (!reverseCheck.ok) {
+        app.notify(reverseCheck.message);
+        return;
+      }
+
       let msg = 'Excluir este pedido permanentemente?';
       if (order.status === 'Recebido') {
-        msg = 'Este pedido já foi recebido e alterou o estoque. Ao excluir, as quantidades serão estornadas. Continuar?';
+        msg = 'Estornar a recepção e excluir este pedido? O estoque voltará ao saldo anterior à entrada.';
       }
       if (!confirm(msg)) return;
 
       if (order.status === 'Recebido') {
-        const products = getProducts();
         order.items.forEach((item) => {
           const prod = products.find((p) => p.id === item.productId);
-          if (prod) prod.quantidade = Math.max(0, (prod.quantidade || 0) - item.quantity);
+          if (prod && item.qtyBeforeReceive != null) {
+            prod.quantidade = item.qtyBeforeReceive;
+          }
         });
         setProducts(products);
         renderProducts();

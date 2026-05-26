@@ -205,7 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ops = report.operations;
     renderStatList(document.getElementById('opsStats'), [
-      { label: 'Notas fiscais emitidas', value: String(ops.fiscalNotesTotal) },
+      { label: 'NF-e autorizadas', value: String(report.summary.fiscalNotesAuthorized ?? ops.fiscalNotesTotal) },
+      { label: 'NF-e canceladas', value: String(report.summary.fiscalNotesCancelled ?? 0) },
       { label: 'Pedidos de reposição', value: String(ops.stockOrdersTotal) },
       { label: 'Pedidos pendentes', value: String(ops.pendingStockOrders) },
       { label: 'Produtos em estoque baixo', value: String(s.lowStockCount) }

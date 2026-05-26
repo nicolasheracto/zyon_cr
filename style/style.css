@@ -161,6 +161,7 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
   border-radius: 8px; font-size: 0.95rem; outline: none;
 }
 .form-group input:focus { border-color: var(--royal); } /* Destaque ao focar */
+.form-group input.input-invalid { border-color: var(--red); }
 
 /* Botões primário (azul) e secundário (cinza) */
 .btn-primary, .btn-secondary {
@@ -171,6 +172,21 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
 .btn-primary { background: var(--royal); color: var(--white); }
 .btn-primary:hover { background: var(--royal-hover); }
 .btn-secondary { background: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--border); }
+.btn-red {
+  background: var(--red); color: var(--white); border: none; border-radius: 8px;
+  padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+}
+.btn-red:hover { filter: brightness(0.92); }
+.btn-red:disabled { opacity: 0.5; cursor: not-allowed; }
+.form-group textarea {
+  width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 0.95rem; font-family: inherit; resize: vertical; min-height: 90px;
+}
+.form-group textarea:focus { outline: none; border-color: var(--royal); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.danfe-cancelled-banner {
+  background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+  padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 600;
+}
 
 /* ===== MODAIS (Janelas de diálogo) ===== */
 .modal {
@@ -297,6 +313,13 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
 }
 .action-btns span:hover {
   background: var(--gray-bg);
+}
+.action-btns .action-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.action-btns .action-disabled:hover {
+  background: transparent;
 }
 
 /* ===== BOTÃO REMOVER ITEM (X vermelho) ===== */
