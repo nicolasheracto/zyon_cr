@@ -19,8 +19,17 @@
   /* Dados padrão (seed) — usados na primeira execução ou quando não há dados salvos */
   const defaults = {
     settings: {
-      companyName: 'Zyon ERP',       /* Nome padrão da empresa */
-      lowStockThreshold: 10           /* Quantidade mínima para alerta de estoque baixo */
+      companyName: 'Zyon ERP',
+      lowStockThreshold: 10,
+      fiscal: {
+        razaoSocial: 'Zyon Comércio Ltda',
+        cnpj: '12.345.678/0001-90',
+        ie: '123.456.789.012',
+        endereco: 'Av. Comercial, 1000 - Centro - São Paulo/SP',
+        serie: '1',
+        naturezaOperacao: 'Venda de mercadoria adquirida de terceiros',
+        cfopPadrao: '5102'
+      }
     },
     clients: [
       {
@@ -77,7 +86,15 @@
 
   /* Garante que os dados padrão sejam salvos na primeira execução */
   function ensureSeedData() {
-    if (!localStorage.getItem(KEYS.settings)) setData(KEYS.settings, defaults.settings);
+    if (!localStorage.getItem(KEYS.settings)) {
+      setData(KEYS.settings, defaults.settings);
+    } else {
+      const settings = getData(KEYS.settings, defaults.settings);
+      if (!settings.fiscal) {
+        settings.fiscal = { ...defaults.settings.fiscal };
+        setData(KEYS.settings, settings);
+      }
+    }
     if (!localStorage.getItem(KEYS.clients)) setData(KEYS.clients, defaults.clients);
     if (!localStorage.getItem(KEYS.products)) setData(KEYS.products, defaults.products);
     if (!localStorage.getItem(KEYS.sales)) setData(KEYS.sales, defaults.sales);
@@ -134,6 +151,47 @@
     return sales.reduce((acc, sale) => acc + (sale.total || 0), 0);
   }
 
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function initPage() {
+    startClock();
+    applyBranding();
+    return window.ZyonApp;
+  }
+
+  function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  function renderTable(tbody, rows, emptyColspan, emptyMessage) {
+    if (!tbody) return;
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="${emptyColspan}" class="table-empty">${escapeHtml(emptyMessage)}</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.join('');
+  }
+
+  function loadStore() {
+    return {
+      sales: getData(KEYS.sales, []),
+      products: getData(KEYS.products, []),
+      clients: getData(KEYS.clients, []),
+      sellers: getData(KEYS.sellers, []),
+      suppliers: getData(KEYS.suppliers, []),
+      fiscalNotes: getData(KEYS.fiscalNotes, []),
+      stockOrders: getData(KEYS.stockOrders, []),
+      settings: getData(KEYS.settings, defaults.settings)
+    };
+  }
+
   /* Popula dados iniciais se necessário */
   ensureSeedData();
 
@@ -147,6 +205,11 @@
     startClock,
     applyBranding,
     notify,
-    sumSalesTotal
+    sumSalesTotal,
+    escapeHtml,
+    initPage,
+    setText,
+    renderTable,
+    loadStore
   };
 })();

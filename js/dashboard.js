@@ -1,55 +1,30 @@
-/* === PAINEL PRINCIPAL (Dashboard) ===
-   - Calcula e exibe KPIs (indicadores do dia)
-   - Lista as 5 vendas mais recentes */
+/* === PAINEL PRINCIPAL (Dashboard) === */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = window.ZyonApp;
-  app.startClock();
-  app.applyBranding();
-
-  /* Carrega todos os dados necessários */
-  const clients = app.getData(app.KEYS.clients, []);
-  const products = app.getData(app.KEYS.products, []);
-  const sales = app.getData(app.KEYS.sales, []);
-  const settings = app.getData(app.KEYS.settings, app.defaults.settings);
-
-  /* Filtra vendas do dia atual comparando a data */
-  const today = new Date().toLocaleDateString('pt-BR');
-  const salesToday = sales.filter((sale) => (sale.date || '').includes(today));
-  const totalToday = app.sumSalesTotal(salesToday);
+  const app = window.ZyonApp.initPage();
+  const store = app.loadStore();
+  const settings = store.settings;
+  const salesToday = window.ZyonAnalytics.filterSalesByPeriod(store.sales, 'today');
+  const totalToday = window.ZyonAnalytics.sumSalesTotal(salesToday);
   const averageTicket = salesToday.length ? totalToday / salesToday.length : 0;
-  const lowStock = products.filter((p) => (p.quantidade || 0) <= settings.lowStockThreshold).length;
-  const activeClients = clients.filter((c) => c.status === 'Ativo').length;
+  const lowStock = store.products.filter((p) => (p.quantidade || 0) <= (settings.lowStockThreshold ?? 10)).length;
+  const activeClients = store.clients.filter((c) => c.status === 'Ativo').length;
 
-  /* Atualiza os elementos dos KPIs no HTML */
-  const kpiSalesToday = document.getElementById('kpiSalesToday');
-  const kpiTicket = document.getElementById('kpiTicket');
-  const kpiLowStock = document.getElementById('kpiLowStock');
-  const kpiClients = document.getElementById('kpiClients');
+  app.setText('kpiSalesToday', app.formatCurrency(totalToday));
+  app.setText('kpiTicket', app.formatCurrency(averageTicket));
+  app.setText('kpiLowStock', `${lowStock} itens`);
+  app.setText('kpiClients', String(activeClients));
 
-  if (kpiSalesToday) kpiSalesToday.textContent = app.formatCurrency(totalToday);
-  if (kpiTicket) kpiTicket.textContent = app.formatCurrency(averageTicket);
-  if (kpiLowStock) kpiLowStock.textContent = `${lowStock} itens`;
-  if (kpiClients) kpiClients.textContent = `${activeClients}`;
-
-  /* Preenche a tabela de últimas vendas (5 mais recentes) */
-  const latestSalesBody = document.getElementById('latestSalesBody');
-  if (!latestSalesBody) return;
-
-  latestSalesBody.innerHTML = '';
-  const recent = [...sales].slice(-5).reverse(); /* Últimas 5, ordem decrescente */
-  if (!recent.length) {
-    latestSalesBody.innerHTML = '<tr><td colspan="3">Nenhuma venda registrada ainda.</td></tr>';
-    return;
-  }
-
-  recent.forEach((sale) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${sale.customer || 'Consumidor Final'}</td>
-      <td>${app.formatCurrency(sale.total || 0)}</td>
-      <td>${sale.date || '-'}</td>
-    `;
-    latestSalesBody.appendChild(tr);
-  });
+  app.renderTable(
+    document.getElementById('latestSalesBody'),
+    [...store.sales].reverse().slice(0, 8).map(
+      (sale) => `<tr>
+        <td>${app.escapeHtml(sale.customer || 'Consumidor Final')}</td>
+        <td>${app.formatCurrency(sale.total || 0)}</td>
+        <td>${app.escapeHtml(sale.date || '-')}</td>
+      </tr>`
+    ),
+    3,
+    'Nenhuma venda registrada ainda.'
+  );
 });

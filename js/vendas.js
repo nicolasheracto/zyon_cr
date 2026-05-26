@@ -4,9 +4,7 @@
      checkout com múltiplas formas de pagamento e finalização */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = window.ZyonApp;
-  app.startClock();
-  app.applyBranding();
+  const app = window.ZyonApp.initPage();
 
   /* Estado interno da venda atual */
   let items = [];         /* Itens adicionados ao carrinho */

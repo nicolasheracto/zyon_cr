@@ -4,9 +4,7 @@
    - Ao receber um pedido, as quantidades dos produtos são atualizadas automaticamente */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = window.ZyonApp;
-  app.startClock();
-  app.applyBranding();
+  const app = window.ZyonApp.initPage();
 
   /* === REFERÊNCIAS AOS ELEMENTOS DOM === */
 
@@ -114,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <td class="action-btns">
           ${isPending ? '<span title="Receber" data-action="receive" data-id="' + order.id + '">✅ Receber</span>' : ''}
           ${isPending ? '<span title="Cancelar" data-action="cancel" data-id="' + order.id + '">🚫 Cancelar</span>' : ''}
+          <span title="Excluir" data-action="delete" data-id="${order.id}">🗑️</span>
           <span title="Visualizar" data-action="view" data-id="${order.id}">👁️</span>
         </td>
       `;
@@ -247,14 +246,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const nome = document.getElementById('nomeProduto')?.value.trim();
     const preco = Number(document.getElementById('precoProduto')?.value || 0);
     const quantidade = Number(document.getElementById('qtdProduto')?.value || 0);
+    const products = getProducts();
+    const validation = window.ZyonValidators.validateProduct(
+      { sku, nome, preco, quantidade },
+      { existing: products }
+    );
 
-    if (!sku || !nome || preco <= 0 || quantidade < 0) {
-      app.notify('Preencha os dados do produto corretamente.');
+    if (!validation.ok) {
+      app.notify(validation.errors[0]);
       return;
     }
 
-    const products = getProducts();
-    products.push({ id: crypto.randomUUID(), sku, nome, preco, quantidade });
+    products.push({ id: crypto.randomUUID(), sku: sku.toUpperCase(), nome, preco, quantidade });
     setProducts(products);
     form.reset();
     app.notify('Produto cadastrado.');
@@ -413,6 +416,32 @@ document.addEventListener('DOMContentLoaded', () => {
       orders[idx].status = 'Cancelado';
       setOrders(orders);
       app.notify('Pedido cancelado.');
+      renderOrders();
+      return;
+    }
+
+    /* Excluir pedido (estorna estoque se já recebido) */
+    if (action === 'delete') {
+      const order = orders[idx];
+      let msg = 'Excluir este pedido permanentemente?';
+      if (order.status === 'Recebido') {
+        msg = 'Este pedido já foi recebido e alterou o estoque. Ao excluir, as quantidades serão estornadas. Continuar?';
+      }
+      if (!confirm(msg)) return;
+
+      if (order.status === 'Recebido') {
+        const products = getProducts();
+        order.items.forEach((item) => {
+          const prod = products.find((p) => p.id === item.productId);
+          if (prod) prod.quantidade = Math.max(0, (prod.quantidade || 0) - item.quantity);
+        });
+        setProducts(products);
+        renderProducts();
+      }
+
+      orders.splice(idx, 1);
+      setOrders(orders);
+      app.notify('Pedido excluído.');
       renderOrders();
       return;
     }

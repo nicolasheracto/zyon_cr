@@ -24,34 +24,71 @@
 
     <main class="main-content">
       <header class="topbar">
-        <span class="app-title">Configurações - <span class="js-company-name">Zyon ERP</span></span>
-        <span id="clock"></span>
+        <div>
+          <span class="app-title">Configurações</span>
+          <p class="page-lead">Parâmetros gerais do ERP e dados do emitente fiscal.</p>
+        </div>
+        <span id="clock" class="topbar-clock"></span>
       </header>
 
-      <!-- FORMULÁRIO DE CONFIGURAÇÕES GLOBAIS DO SISTEMA -->
-      <div class="main-area">
-        <h2>Preferências Gerais</h2>
+      <div class="section-card">
+        <h2>Preferências gerais</h2>
         <form id="settingsForm">
-          <!-- Nome da empresa: usado no título da sidebar e topbar -->
           <div class="form-group">
-            <label for="companyName">Nome da Empresa</label>
-            <input id="companyName" type="text">
+            <label for="companyName">Nome da empresa (exibição)</label>
+            <input id="companyName" type="text" required>
           </div>
-          <!-- Limite mínimo de estoque: produtos abaixo desse valor são destacados como "Baixo" -->
           <div class="form-group">
             <label for="lowStockThreshold">Limite de estoque baixo</label>
-            <input id="lowStockThreshold" type="number" min="0">
+            <input id="lowStockThreshold" type="number" min="0" required>
           </div>
-          <!-- Botão para salvar as configurações (armazenadas no localStorage) -->
+
+          <h2 style="margin:1.5rem 0 1rem">Emitente NF-e (simulação)</h2>
+          <div class="row" style="flex-wrap:wrap">
+            <div class="form-group" style="flex:2;min-width:220px">
+              <label for="fiscalRazao">Razão social</label>
+              <input id="fiscalRazao" type="text" required>
+            </div>
+            <div class="form-group" style="flex:1;min-width:180px">
+              <label for="fiscalCnpj">CNPJ</label>
+              <input id="fiscalCnpj" type="text" placeholder="00.000.000/0001-00" required>
+            </div>
+            <div class="form-group" style="flex:1;min-width:160px">
+              <label for="fiscalIe">Inscrição estadual</label>
+              <input id="fiscalIe" type="text" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="fiscalEndereco">Endereço completo</label>
+            <input id="fiscalEndereco" type="text" required>
+          </div>
+          <div class="row" style="flex-wrap:wrap">
+            <div class="form-group" style="flex:0.5;min-width:100px">
+              <label for="fiscalSerie">Série NF-e</label>
+              <input id="fiscalSerie" type="text" required>
+            </div>
+            <div class="form-group" style="flex:1;min-width:160px">
+              <label for="fiscalCfop">CFOP padrão</label>
+              <input id="fiscalCfop" type="text" maxlength="4" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="fiscalNatureza">Natureza da operação</label>
+            <input id="fiscalNatureza" type="text" required>
+          </div>
+
           <div class="modal-actions">
-            <button type="submit" class="btn-primary">Salvar Configurações</button>
+            <button type="submit" class="btn-primary">Salvar configurações</button>
           </div>
         </form>
       </div>
     </main>
   </div>
 
+  <script src="js/auth.js"></script>
+  <script src="js/session.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/validators.js"></script>
   <script src="js/configuracoes.js"></script>
 </body>
 </html>

@@ -2,9 +2,7 @@
    - Lista, busca, visualiza, edita e alterna status de clientes */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = window.ZyonApp;
-  app.startClock();
-  app.applyBranding();
+  const app = window.ZyonApp.initPage();
 
   const tableBody = document.getElementById('clientsTableBody');
   const searchInput = document.getElementById('clientSearch');

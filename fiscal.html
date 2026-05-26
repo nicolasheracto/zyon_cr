@@ -24,43 +24,122 @@
 
     <main class="main-content">
       <header class="topbar">
-        <span class="app-title">Fiscal - <span class="js-company-name">Zyon ERP</span></span>
-        <span id="clock"></span>
+        <div>
+          <span class="app-title">Fiscal / NF-e</span>
+          <p class="page-lead">Emissão simulada de Nota Fiscal Eletrônica (ambiente de demonstração).</p>
+        </div>
+        <span id="clock" class="topbar-clock"></span>
       </header>
 
-      <!-- FORMULÁRIO DE EMISSÃO DE NOTA FISCAL -->
-      <div class="main-area" style="margin-bottom: 1.5rem;">
-        <h2>Emissão de Nota Fiscal</h2>
+      <section class="kpi-cards">
+        <div class="card card-blue"><h3>Notas autorizadas</h3><p id="fiscalKpiNotes">0</p></div>
+        <div class="card card-yellow"><h3>Vendas sem NF-e</h3><p id="fiscalKpiPending">0</p></div>
+        <div class="card card-green"><h3>Valor emitido</h3><p id="fiscalKpiTotal">R$ 0,00</p></div>
+      </section>
+
+      <div class="section-card">
+        <h2>Emitir NF-e (simulação)</h2>
         <div class="row">
-          <!-- Select listando as vendas que ainda não possuem nota fiscal emitida -->
-          <div class="form-group" style="flex:2;">
-            <label for="salesSelect">Venda sem nota</label>
+          <div class="form-group" style="flex:2">
+            <label for="salesSelect">Venda pendente de documento fiscal</label>
             <select id="salesSelect"></select>
           </div>
-          <!-- Botão para emitir a nota fiscal da venda selecionada -->
-          <div class="form-group" style="display:flex; align-items:flex-end;">
-            <button id="emitNoteBtn" class="btn-primary" type="button">Emitir NF</button>
+          <div class="form-group" style="display:flex;align-items:flex-end;gap:0.5rem;flex-wrap:wrap">
+            <button id="previewNoteBtn" class="btn-secondary" type="button">Pré-visualizar DANFE</button>
+            <button id="emitNoteBtn" class="btn-primary" type="button" disabled>Transmitir à SEFAZ</button>
           </div>
         </div>
+        <p class="field-hint">A transmissão é simulada: gera chave de acesso, protocolo e XML fictício para fins didáticos.</p>
       </div>
 
-      <!-- TABELA DE NOTAS FISCAIS EMITIDAS -->
-      <table>
-        <thead>
-          <tr>
-            <th>Número</th>
-            <th>Cliente</th>
-            <th>Total</th>
-            <th>Data</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="fiscalNotesBody"></tbody>
-      </table>
+      <div id="danfePreview" class="danfe-preview section-card" hidden>
+        <div class="danfe-header">
+          <div>
+            <span class="danfe-badge">DANFE — Simulação</span>
+            <h2 id="danfeTitle">NF-e nº —</h2>
+          </div>
+          <div class="danfe-meta" id="danfeMeta"></div>
+        </div>
+        <div class="danfe-grid">
+          <div class="danfe-block">
+            <h3>Emitente</h3>
+            <div id="danfeEmitter"></div>
+          </div>
+          <div class="danfe-block">
+            <h3>Destinatário</h3>
+            <div id="danfeCustomer"></div>
+          </div>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Descrição</th>
+                <th>Qtd</th>
+                <th>V. unit.</th>
+                <th>CFOP</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="danfeItemsBody"></tbody>
+          </table>
+        </div>
+        <div class="danfe-totals" id="danfeTotals"></div>
+      </div>
+
+      <section class="section-card">
+        <h2>Histórico de NF-e</h2>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Chave de acesso</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th>Emissão</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="fiscalNotesBody"></tbody>
+          </table>
+        </div>
+      </section>
     </main>
   </div>
 
+  <div class="modal" id="transmitModal">
+    <div class="modal-content fiscal-transmit-modal">
+      <h2>Transmissão NF-e</h2>
+      <ul class="transmit-steps" id="transmitSteps">
+        <li data-step="validate">Validando dados da venda...</li>
+        <li data-step="sign">Assinando XML digitalmente...</li>
+        <li data-step="send">Enviando lote à SEFAZ (simulação)...</li>
+        <li data-step="authorize">Aguardando autorização...</li>
+      </ul>
+      <p id="transmitResult" class="transmit-result" hidden></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="closeTransmitBtn" disabled>Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="noteDetailModal">
+    <div class="modal-content" style="max-width:900px;max-height:90vh;overflow:auto">
+      <h2>Detalhes da NF-e</h2>
+      <div id="noteDetailContent"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="closeNoteDetailBtn">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/session.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/validators.js"></script>
   <script src="js/fiscal.js"></script>
 </body>
 </html>

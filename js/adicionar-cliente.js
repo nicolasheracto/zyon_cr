@@ -2,9 +2,7 @@
    - Captura os dados do formulário e salva no localStorage */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = window.ZyonApp;
-  app.startClock();
-  app.applyBranding();
+  const app = window.ZyonApp.initPage();
 
   const form = document.getElementById('clientForm');
   const cancelButtons = document.querySelectorAll('.cancel-client-btn');

@@ -6,9 +6,7 @@
    - Arquitetura genérica: a config (entities) define campos, renderização e regras */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = window.ZyonApp;
-  app.startClock();
-  app.applyBranding();
+  const app = window.ZyonApp.initPage();
 
   const tabNav = document.getElementById('tabNav');
   const tabContent = document.getElementById('tabContent');
@@ -116,7 +114,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  let currentTab = 'clientes'; /* Aba ativa no momento */
+  let currentTab = 'clientes';
+
+  const validators = {
+    clientes: (data, opts) => window.ZyonValidators.validateClient({
+      nome: data.nome,
+      documento: data.documento,
+      contato: data.contato || ''
+    }, opts),
+    vendedores: (data, opts) => window.ZyonValidators.validateSeller({
+      nome: data.nomeVendedor,
+      documento: data.docVendedor,
+      contato: data.contatoVendedor || '',
+      comissao: data.comissaoVendedor
+    }, opts),
+    fornecedores: (data, opts) => window.ZyonValidators.validateSupplier({
+      nome: data.nomeFornecedor,
+      documento: data.docFornecedor,
+      contato: data.contatoFornecedor || '',
+      endereco: data.enderecoFornecedor || ''
+    }, opts)
+  };
+
+  const fieldKeyMap = {
+    nomeVendedor: 'nome', docVendedor: 'documento', contatoVendedor: 'contato', comissaoVendedor: 'comissao',
+    nomeFornecedor: 'nome', docFornecedor: 'documento', contatoFornecedor: 'contato', enderecoFornecedor: 'endereco'
+  };
 
   /* Retorna os dados da entidade da aba atual */
   function getData(tab) {
@@ -224,16 +247,13 @@ document.addEventListener('DOMContentLoaded', () => {
           if (el) formData[f.id] = el.value;
         });
 
-        /* Valida campos obrigatórios */
-        const requiredFields = cfg.fields.filter((f) => f.required);
-        const missing = requiredFields.some((f) => !formData[f.id]?.trim());
-        if (missing) {
-          app.notify('Preencha os campos obrigatórios.');
+        const items = getData(tab);
+        const validation = validators[tab](formData, { existing: items });
+        if (!validation.ok) {
+          app.notify(validation.errors[0]);
           return;
         }
 
-        /* Salva o novo item */
-        const items = getData(tab);
         items.push(cfg.buildItem(formData));
         setData(tab, items);
         app.notify(cfg.label + ' cadastrado.');
@@ -261,13 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const item = items[idx];
           let msg = '';
           cfg.fields.forEach((f) => {
-            /* Mapeia IDs de campos para as chaves reais do objeto */
-            const keyMap = {
-              nomeProduto: 'nome', precoProduto: 'preco', qtdProduto: 'quantidade',
-              nomeVendedor: 'nome', docVendedor: 'documento', contatoVendedor: 'contato', comissaoVendedor: 'comissao',
-              nomeFornecedor: 'nome', docFornecedor: 'documento', contatoFornecedor: 'contato', enderecoFornecedor: 'endereco'
-            };
-            const key = keyMap[f.id] || f.id;
+            const key = fieldKeyMap[f.id] || f.id;
             const val = item[key] ?? '';
             msg += f.label.replace(' *', '') + ': ' + val + '\n';
           });
@@ -279,22 +293,28 @@ document.addEventListener('DOMContentLoaded', () => {
         /* Editar: solicita novo valor para cada campo via prompt */
         if (action === 'edit') {
           const current = items[idx];
-          let valid = true;
+          let cancelled = false;
           cfg.fields.forEach((f) => {
-            const keyMap = {
-              nomeProduto: 'nome', precoProduto: 'preco', qtdProduto: 'quantidade',
-              nomeVendedor: 'nome', docVendedor: 'documento', contatoVendedor: 'contato', comissaoVendedor: 'comissao',
-              nomeFornecedor: 'nome', docFornecedor: 'documento', contatoFornecedor: 'contato', enderecoFornecedor: 'endereco'
-            };
-            const key = keyMap[f.id] || f.id;
+            const key = fieldKeyMap[f.id] || f.id;
             const val = prompt(f.label + ':', current[key] ?? '');
-            if (f.required && !val) { valid = false; return; }
-            if (val !== null) {
-              /* Converte campos numéricos */
-              items[idx][key] = (key === 'preco' || key === 'quantidade' || key === 'comissao') ? Number(val) : val;
-            }
+            if (val === null) { cancelled = true; return; }
+            if (f.required && !String(val).trim()) { cancelled = true; return; }
+            items[idx][key] = key === 'comissao' ? Number(val) : String(val).trim();
           });
-          if (!valid) { app.notify('Campos obrigatórios não podem ficar vazios.'); return; }
+          if (cancelled) { app.notify('Edição cancelada.'); return; }
+
+          const editForm = {};
+          cfg.fields.forEach((f) => {
+            const key = fieldKeyMap[f.id] || f.id;
+            editForm[f.id] = items[idx][key];
+          });
+          const validation = validators[tab](editForm, { existing: items, excludeId: id });
+          if (!validation.ok) {
+            app.notify(validation.errors[0]);
+            renderTab(tab);
+            return;
+          }
+
           setData(tab, items);
           app.notify(cfg.label + ' atualizado.');
           renderTab(tab);

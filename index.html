@@ -25,22 +25,21 @@
       <div class="server-status">
         <span class="status-indicator green"></span> Servidor Disponível
       </div>
-      <!-- Formulário de login que redireciona ao dashboard no submit -->
-      <form id="loginForm" action="dashboard.html">
-        <!-- Campo de texto para o nome do usuário, pré-preenchido com "Admin" -->
+      <p id="loginError" class="login-error" role="alert" hidden></p>
+      <form id="loginForm" novalidate>
         <div class="form-group">
           <label for="username">Usuário</label>
-          <input type="text" id="username" value="Admin" required>
+          <input type="text" id="username" name="username" autocomplete="username" required>
         </div>
-        <!-- Campo de senha (oculta os caracteres digitados) -->
         <div class="form-group">
           <label for="password">Senha</label>
-          <input type="password" id="password" required>
+          <input type="password" id="password" name="password" autocomplete="current-password" required>
         </div>
-        <!-- Botão de Submit para enviar o formulário -->
         <button type="submit" class="btn-primary">Entrar</button>
       </form>
     </div>
   </div>
+  <script src="js/auth.js"></script>
+  <script src="js/login.js"></script>
 </body>
 </html>
