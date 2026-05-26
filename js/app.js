@@ -97,7 +97,12 @@
         serie: legacy.serie || defaults.fiscalConfig.serie
       });
     }
-    if (!localStorage.getItem(KEYS.clients)) setData(KEYS.clients, defaults.clients);
+    if (!localStorage.getItem(KEYS.clients)) {
+      setData(KEYS.clients, defaults.clients);
+    } else {
+      const clients = getData(KEYS.clients, []);
+      if (!Array.isArray(clients)) setData(KEYS.clients, defaults.clients);
+    }
     if (!localStorage.getItem(KEYS.products)) setData(KEYS.products, defaults.products);
     if (!localStorage.getItem(KEYS.sales)) setData(KEYS.sales, defaults.sales);
     if (!localStorage.getItem(KEYS.fiscalNotes)) setData(KEYS.fiscalNotes, defaults.fiscalNotes);
@@ -196,6 +201,7 @@
 
   function clientHasLinkedSales(clientName, sales = null) {
     const list = sales ?? getData(KEYS.sales, []);
+    if (!Array.isArray(list)) return false;
     const name = String(clientName ?? '').trim();
     return list.some((sale) => String(sale.customer ?? '').trim() === name);
   }

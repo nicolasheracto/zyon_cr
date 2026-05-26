@@ -17,15 +17,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const contato = document.getElementById('contato')?.value.trim();
     const tipo = document.querySelector('input[name="tipoPessoa"]:checked')?.value || 'pf';
 
-    /* Valida campos obrigatórios */
-    if (!nome || !documento) {
-      app.notify('Preencha os campos obrigatórios.');
+    const clients = app.getData(app.KEYS.clients, []);
+    const list = Array.isArray(clients) ? clients : [];
+
+    const validation = window.ZyonValidators.validateClient(
+      { nome, documento, contato },
+      { existing: list }
+    );
+    if (!validation.ok) {
+      app.notify(validation.errors[0]);
       return;
     }
 
-    /* Adiciona o novo cliente ao array e salva */
-    const clients = app.getData(app.KEYS.clients, []);
-    clients.push({
+    list.push({
       id: crypto.randomUUID(),
       nome,
       documento,
@@ -33,19 +37,19 @@ document.addEventListener('DOMContentLoaded', () => {
       status: 'Ativo',
       tipo
     });
-    app.setData(app.KEYS.clients, clients);
+    app.setData(app.KEYS.clients, list);
     app.notify('Cliente salvo com sucesso.');
 
     /* Redireciona para a página de cadastros após breve delay */
     setTimeout(() => {
-      window.location.href = 'cadastros.html';
+      window.location.href = 'cadastros.html#clientes';
     }, 500);
   });
 
   /* Botão cancelar: volta para a página de cadastros */
   cancelButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      window.location.href = 'cadastros.html';
+      window.location.href = 'cadastros.html#clientes';
     });
   });
 });

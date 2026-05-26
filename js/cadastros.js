@@ -25,11 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
       /* Renderiza uma linha da tabela para um item */
       renderRow: (item, ctx) => {
         const active = item.status === 'Ativo';
-        const canDelete = ctx?.canDeleteClient?.(item.nome);
+        const canDelete = ctx?.canDeleteClient ? ctx.canDeleteClient(item.nome) : true;
+        const nome = app.escapeHtml(item.nome);
+        const contato = app.escapeHtml(item.contato || '-');
+        const documento = app.escapeHtml(item.documento || '-');
+        const status = app.escapeHtml(item.status);
         return `
-          <td><strong style="color:var(--text-dark);display:block;font-size:1rem">${item.nome}</strong><span style="font-size:0.85rem;color:var(--text-light)">${item.contato || '-'}</span></td>
-          <td style="color:var(--text-light)">${item.documento || '-'}</td>
-          <td><span class="status-badge ${active ? 'status-active' : 'status-inactive'}">${item.status}</span></td>
+          <td><strong style="color:var(--text-dark);display:block;font-size:1rem">${nome}</strong><span style="font-size:0.85rem;color:var(--text-light)">${contato}</span></td>
+          <td style="color:var(--text-light)">${documento}</td>
+          <td><span class="status-badge ${active ? 'status-active' : 'status-inactive'}">${status}</span></td>
           <td class="action-btns">
             <span title="Visualizar" data-action="view" data-id="${item.id}">👁️</span>
             <span title="Editar" data-action="edit" data-id="${item.id}">✏️</span>
@@ -145,15 +149,16 @@ document.addEventListener('DOMContentLoaded', () => {
     nomeFornecedor: 'nome', docFornecedor: 'documento', contatoFornecedor: 'contato', enderecoFornecedor: 'endereco'
   };
 
-  /* Retorna os dados da entidade da aba atual */
-  function getData(tab) {
+  function loadTabData(tab) {
     const cfg = entities[tab];
-    return app.getData(cfg.key, []);
+    if (!cfg) return [];
+    const raw = app.getData(cfg.key, []);
+    return Array.isArray(raw) ? raw : [];
   }
 
-  /* Salva os dados da entidade da aba atual */
-  function setData(tab, data) {
+  function saveTabData(tab, data) {
     const cfg = entities[tab];
+    if (!cfg) return;
     app.setData(cfg.key, data);
   }
 
@@ -177,9 +182,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* Renderiza o conteúdo completo de uma aba (busca + formulário + tabela) */
   function renderTab(tab) {
+    if (!tabContent) return;
     const cfg = entities[tab];
-    const data = getData(tab);
-    const settings = app.getData(app.KEYS.settings, app.defaults.settings);
+    if (!cfg) return;
+
+    const data = loadTabData(tab);
     const searchTerm = (document.getElementById('search-' + tab)?.value || '').toLowerCase().trim();
 
     /* Aplica filtro de busca textual */
@@ -212,7 +219,12 @@ document.addEventListener('DOMContentLoaded', () => {
     html += '  </tr></thead><tbody id="tbody-' + tab + '">';
 
     const rowCtx = tab === 'clientes'
-      ? { canDeleteClient: (nome) => !app.clientHasLinkedSales(nome) }
+      ? {
+          canDeleteClient: (nome) => {
+            if (typeof app.clientHasLinkedSales !== 'function') return true;
+            return !app.clientHasLinkedSales(nome);
+          }
+        }
       : {};
 
     if (!filtered.length) {
@@ -255,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (el) formData[f.id] = el.value;
         });
 
-        const items = getData(tab);
+        const items = loadTabData(tab);
         const validation = validators[tab](formData, { existing: items });
         if (!validation.ok) {
           app.notify(validation.errors[0]);
@@ -263,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         items.push(cfg.buildItem(formData));
-        setData(tab, items);
+        saveTabData(tab, items);
         app.notify(cfg.label + ' cadastrado.');
         form.reset();
         renderTab(tab);
@@ -280,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const action = target.dataset.action;
         if (!id || !action) return;
 
-        const items = getData(tab);
+        const items = loadTabData(tab);
         const idx = items.findIndex((i) => i.id === id);
         if (idx < 0) return;
 
@@ -323,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
           }
 
-          setData(tab, items);
+          saveTabData(tab, items);
           app.notify(cfg.label + ' atualizado.');
           renderTab(tab);
           return;
@@ -332,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
         /* Alternar status (Ativo <-> Inativo) */
         if (action === 'toggle') {
           items[idx].status = items[idx].status === 'Ativo' ? 'Inativo' : 'Ativo';
-          setData(tab, items);
+          saveTabData(tab, items);
           app.notify('Status alterado.');
           renderTab(tab);
           return;
@@ -349,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           if (!confirm(`Excluir o cliente "${client.nome}" permanentemente?`)) return;
           items.splice(idx, 1);
-          setData(tab, items);
+          saveTabData(tab, items);
           app.notify('Cliente excluído.');
           renderTab(tab);
         }
@@ -376,6 +388,22 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTab(tab);
   });
 
-  /* Inicializa com a aba de clientes */
-  renderTab('clientes');
+  if (!window.ZyonValidators) {
+    tabContent.innerHTML = '<p class="table-empty">Erro ao carregar validadores. Verifique se js/validators.js está disponível.</p>';
+    return;
+  }
+
+  if (!tabNav || !tabContent) {
+    return;
+  }
+
+  const hashTab = window.location.hash.replace('#', '');
+  if (hashTab && entities[hashTab]) {
+    currentTab = hashTab;
+    tabNav.querySelectorAll('.tab').forEach((t) => {
+      t.classList.toggle('active', t.dataset.tab === hashTab);
+    });
+  }
+
+  renderTab(currentTab);
 });
