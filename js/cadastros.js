@@ -105,17 +105,26 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'contatoFornecedor', label: 'Contato', type: 'text', required: false },
         { id: 'enderecoFornecedor', label: 'Endereço', type: 'text', required: false }
       ],
-      renderRow: (item) => {
+      renderRow: (item, ctx) => {
         const active = item.status === 'Ativo';
+        const canDelete = ctx?.canDeleteSupplier ? ctx.canDeleteSupplier(item.id) : true;
+        const nome = app.escapeHtml(item.nome);
+        const contato = app.escapeHtml(item.contato || '-');
+        const documento = app.escapeHtml(item.documento || '-');
+        const endereco = app.escapeHtml(item.endereco || '-');
+        const status = app.escapeHtml(item.status);
         return `
-          <td><strong style="color:var(--text-dark);display:block;font-size:1rem">${item.nome}</strong><span style="font-size:0.85rem;color:var(--text-light)">${item.contato || '-'}</span></td>
-          <td style="color:var(--text-light)">${item.documento || '-'}</td>
-          <td style="color:var(--text-light)">${item.endereco || '-'}</td>
-          <td><span class="status-badge ${active ? 'status-active' : 'status-inactive'}">${item.status}</span></td>
+          <td><strong style="color:var(--text-dark);display:block;font-size:1rem">${nome}</strong><span style="font-size:0.85rem;color:var(--text-light)">${contato}</span></td>
+          <td style="color:var(--text-light)">${documento}</td>
+          <td style="color:var(--text-light)">${endereco}</td>
+          <td><span class="status-badge ${active ? 'status-active' : 'status-inactive'}">${status}</span></td>
           <td class="action-btns">
             <span title="Visualizar" data-action="view" data-id="${item.id}">👁️</span>
             <span title="Editar" data-action="edit" data-id="${item.id}">✏️</span>
             <span title="${active ? 'Inativar' : 'Ativar'}" data-action="toggle" data-id="${item.id}">${active ? '🚫' : '✅'}</span>
+            ${canDelete
+              ? `<span title="Excluir" data-action="delete" data-id="${item.id}">🗑️</span>`
+              : `<span class="action-disabled" title="Fornecedor com pedidos de reposição vinculados — exclusão bloqueada">🗑️</span>`}
           </td>`;
       },
       getSearchText: (item) => [item.nome, item.documento, item.contato, item.endereco].join(' ').toLowerCase(),
@@ -239,6 +248,13 @@ document.addEventListener('DOMContentLoaded', () => {
           canDeleteSeller: (nome) => {
             if (typeof app.sellerHasLinkedSales !== 'function') return true;
             return !app.sellerHasLinkedSales(nome);
+          }
+        }
+      : tab === 'fornecedores'
+      ? {
+          canDeleteSupplier: (id) => {
+            if (typeof app.supplierHasLinkedOrders !== 'function') return true;
+            return !app.supplierHasLinkedOrders(id);
           }
         }
       : {};
@@ -390,6 +406,18 @@ document.addEventListener('DOMContentLoaded', () => {
             items.splice(idx, 1);
             saveTabData(tab, items);
             app.notify('Vendedor excluído.');
+            renderTab(tab);
+          } else if (tab === 'fornecedores') {
+            const supplier = items[idx];
+            if (app.supplierHasLinkedOrders(supplier.id)) {
+              app.notify('Não é possível excluir: existem pedidos de reposição vinculados a este fornecedor.');
+              return;
+            }
+
+            if (!confirm(`Excluir o fornecedor "${supplier.nome}" permanentemente?`)) return;
+            items.splice(idx, 1);
+            saveTabData(tab, items);
+            app.notify('Fornecedor excluído.');
             renderTab(tab);
           }
         }

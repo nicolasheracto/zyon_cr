@@ -213,6 +213,13 @@
     return list.some((sale) => String(sale.seller ?? '').trim() === name);
   }
 
+  function supplierHasLinkedOrders(supplierId, orders = null) {
+    const list = orders ?? getData(KEYS.stockOrders, []);
+    if (!Array.isArray(list)) return false;
+    const id = String(supplierId ?? '').trim();
+    return list.some((order) => String(order.supplierId ?? '').trim() === id);
+  }
+
   function canReverseStockReceipt(order, products) {
     if (!order || order.status !== 'Recebido') return { ok: true };
 
@@ -263,6 +270,7 @@
     loadStore,
     clientHasLinkedSales,
     sellerHasLinkedSales,
+    supplierHasLinkedOrders,
     canReverseStockReceipt
   };
 })();
