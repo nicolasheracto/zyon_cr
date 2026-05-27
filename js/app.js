@@ -41,9 +41,9 @@
       },
       {
         id: crypto.randomUUID(),
-        nome: 'João Silva',
+        nome: 'Cliente Teste',
         documento: '123.456.789-00',
-        contato: 'joao.silva@email.com',
+        contato: 'cliente@teste.com',
         status: 'Ativo',
         tipo: 'pf'
       }
@@ -58,35 +58,92 @@
     fiscalNotes: [], /* Nenhuma nota fiscal inicialmente */
     sellers: [
       /* Vendedor padrão de exemplo */
-      { id: crypto.randomUUID(), nome: 'Carlos Vendedor', documento: '111.222.333-44', contato: 'carlos@email.com', comissao: 5, status: 'Ativo' }
+      { id: crypto.randomUUID(), nome: 'Vendedor', documento: '111.222.333-44', contato: 'vendedor@teste.com', comissao: 5, status: 'Ativo' }
     ],
     suppliers: [
       /* Fornecedor padrão de exemplo */
-      { id: crypto.randomUUID(), nome: 'Distribuidora ABC Ltda', documento: '00.000.000/0001-00', contato: 'abc@distribuidora.com', endereco: 'Av. Principal, 1000', status: 'Ativo' }
+      { id: crypto.randomUUID(), nome: 'Zyon Sistemas Innova Simples', documento: '00.000.000/0001-00', contato: 'desenvolvimento@zyonsistemas.com.br', endereco: 'Rua Teste, 110', status: 'Ativo' }
     ],
     stockOrders: []  /* Nenhum pedido inicialmente */
   };
 
-  /* Lê dados do localStorage; retorna fallback se não existir */
-  function getData(key, fallback) {
-    try {
-      const raw = localStorage.getItem(key);
-      if (!raw) return fallback;
-      return JSON.parse(raw);
-    } catch {
-      return fallback; /* Em caso de erro (JSON inválido), retorna fallback */
+  /* Determina se os cookies são suportados e graváveis neste ambiente (ex: file:// bloqueia cookies) */
+  let useCookies = false;
+  try {
+    document.cookie = "zyon_test=1; SameSite=Lax";
+    if (document.cookie.indexOf("zyon_test=") !== -1) {
+      useCookies = true;
+      document.cookie = "zyon_test=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+  } catch (e) {
+    useCookies = false;
+  }
+
+  console.log(`[Zyon ERP] Motor de Armazenamento: ${useCookies ? 'Cookies' : 'LocalStorage (Fallback - protocolo file:// detectado)'}`);
+
+  /* Verifica se existe um dado persistido */
+  function hasData(key) {
+    if (useCookies) {
+      const nameEQ = key + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return true;
+      }
+      return false;
+    } else {
+      return localStorage.getItem(key) !== null;
     }
   }
 
-  /* Salva dados no localStorage como JSON */
+  /* Lê dados persistidos; retorna fallback se não existir */
+  function getData(key, fallback) {
+    try {
+      if (useCookies) {
+        const nameEQ = key + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+          if (c.indexOf(nameEQ) === 0) {
+            const decoded = decodeURIComponent(c.substring(nameEQ.length, c.length));
+            return JSON.parse(decoded);
+          }
+        }
+      } else {
+        const raw = localStorage.getItem(key);
+        if (raw) return JSON.parse(raw);
+      }
+      return fallback;
+    } catch {
+      return fallback; /* Em caso de erro (JSON inválido ou corrompido), retorna fallback */
+    }
+  }
+
+  /* Salva dados no meio de persistência ativo */
   function setData(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+    try {
+      if (useCookies) {
+        const jsonStr = JSON.stringify(value);
+        const encoded = encodeURIComponent(jsonStr);
+        /* Salva com validade de 365 dias */
+        const date = new Date();
+        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+        const expires = "; expires=" + date.toUTCString();
+        document.cookie = key + "=" + encoded + expires + "; path=/; SameSite=Lax";
+      } else {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+    } catch (e) {
+      console.error("Erro ao salvar dados", e);
+    }
   }
 
   /* Garante que os dados padrão sejam salvos na primeira execução */
   function ensureSeedData() {
-    if (!localStorage.getItem(KEYS.settings)) setData(KEYS.settings, defaults.settings);
-    if (!localStorage.getItem(KEYS.fiscalConfig)) {
+    if (!hasData(KEYS.settings)) setData(KEYS.settings, defaults.settings);
+    if (!hasData(KEYS.fiscalConfig)) {
       const settings = getData(KEYS.settings, defaults.settings);
       const legacy = settings.fiscal || {};
       setData(KEYS.fiscalConfig, {
@@ -97,18 +154,18 @@
         serie: legacy.serie || defaults.fiscalConfig.serie
       });
     }
-    if (!localStorage.getItem(KEYS.clients)) {
+    if (!hasData(KEYS.clients)) {
       setData(KEYS.clients, defaults.clients);
     } else {
       const clients = getData(KEYS.clients, []);
       if (!Array.isArray(clients)) setData(KEYS.clients, defaults.clients);
     }
-    if (!localStorage.getItem(KEYS.products)) setData(KEYS.products, defaults.products);
-    if (!localStorage.getItem(KEYS.sales)) setData(KEYS.sales, defaults.sales);
-    if (!localStorage.getItem(KEYS.fiscalNotes)) setData(KEYS.fiscalNotes, defaults.fiscalNotes);
-    if (!localStorage.getItem(KEYS.sellers)) setData(KEYS.sellers, defaults.sellers);
-    if (!localStorage.getItem(KEYS.suppliers)) setData(KEYS.suppliers, defaults.suppliers);
-    if (!localStorage.getItem(KEYS.stockOrders)) setData(KEYS.stockOrders, defaults.stockOrders);
+    if (!hasData(KEYS.products)) setData(KEYS.products, defaults.products);
+    if (!hasData(KEYS.sales)) setData(KEYS.sales, defaults.sales);
+    if (!hasData(KEYS.fiscalNotes)) setData(KEYS.fiscalNotes, defaults.fiscalNotes);
+    if (!hasData(KEYS.sellers)) setData(KEYS.sellers, defaults.sellers);
+    if (!hasData(KEYS.suppliers)) setData(KEYS.suppliers, defaults.suppliers);
+    if (!hasData(KEYS.stockOrders)) setData(KEYS.stockOrders, defaults.stockOrders);
   }
 
   /* Formata valor numérico como moeda BRL (R$ 1.234,56) */
