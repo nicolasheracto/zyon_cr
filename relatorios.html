@@ -4,10 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relatórios - Zyon ERP</title>
+  
+  <!-- Estilos Globais -->
   <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
+
+  <!-- ================= LAYOUT PRINCIPAL ================= -->
   <div class="layout">
+    
+    <!-- ================= BARRA LATERAL (SIDEBAR) ================= -->
     <nav class="sidebar">
       <div class="sidebar-header js-company-name">Zyon ERP</div>
       <ul class="nav-list">
@@ -22,7 +28,10 @@
       </ul>
     </nav>
 
+    <!-- ================= ÁREA DE CONTEÚDO PRINCIPAL ================= -->
     <main class="main-content">
+      
+      <!-- BARRA SUPERIOR (Topbar) -->
       <header class="topbar">
         <div>
           <span class="app-title">Relatórios</span>
@@ -31,6 +40,10 @@
         <span id="clock" class="topbar-clock"></span>
       </header>
 
+      <!-- ================= FILTRO DE DATA GLOBAL ================= 
+           O que for selecionado aqui altera os resultados de TODAS as abas abaixo.
+           Opções: Hoje, Últimos 7 dias, Mês Atual, Todo o Período.
+      -->
       <div class="toolbar-card">
         <label class="filter-label" for="reportPeriod">Período</label>
         <select id="reportPeriod" class="filter-select">
@@ -42,6 +55,7 @@
         <span class="toolbar-hint" id="reportPeriodLabel">Exibindo: todo o período</span>
       </div>
 
+      <!-- ================= CARDS DE INDICADORES (KPIs Gerais) ================= -->
       <section class="kpi-cards" aria-label="Indicadores gerais">
         <div class="card card-blue"><h3>Faturamento</h3><p id="reportRevenue">R$ 0,00</p></div>
         <div class="card card-green"><h3>Vendas</h3><p id="reportSalesCount">0</p></div>
@@ -51,6 +65,7 @@
         <div class="card card-yellow"><h3>Estoque Baixo</h3><p id="reportLowStock">0</p></div>
       </section>
 
+      <!-- ================= NAVEGAÇÃO DE ABAS ================= -->
       <nav class="report-tabs" id="reportTabs" aria-label="Seções do relatório">
         <button type="button" class="report-tab active" data-tab="faturamento">Faturamento</button>
         <button type="button" class="report-tab" data-tab="produtos">Produtos</button>
@@ -59,15 +74,20 @@
         <button type="button" class="report-tab" data-tab="operacional">Operacional</button>
       </nav>
 
+      <!-- ================= CONTEÚDO DAS ABAS (Painéis) ================= -->
       <div class="report-panels">
+        
+        <!-- === ABA: FATURAMENTO === -->
         <section class="report-panel active" data-panel="faturamento">
           <div class="panel-grid">
             <article class="section-card">
               <h2>Resumo de faturamento</h2>
+              <!-- Lista de estatísticas financeiras gerais -->
               <ul class="stat-list" id="billingStats"></ul>
             </article>
             <article class="section-card">
               <h2>Formas de pagamento</h2>
+              <!-- Quanto foi pago em PIX, Cartão, Dinheiro -->
               <div class="table-card">
                 <table>
                   <thead><tr><th>Forma</th><th>Valor</th><th>%</th></tr></thead>
@@ -78,6 +98,7 @@
           </div>
           <article class="section-card">
             <h2>Vendas no período</h2>
+            <!-- Tabela detalhada de cada venda -->
             <div class="table-card">
               <table>
                 <thead><tr><th>Data</th><th>Cliente</th><th>Vendedor</th><th>Itens</th><th>Total</th></tr></thead>
@@ -87,6 +108,7 @@
           </article>
         </section>
 
+        <!-- === ABA: PRODUTOS === -->
         <section class="report-panel" data-panel="produtos" hidden>
           <div class="panel-grid">
             <article class="section-card">
@@ -119,6 +141,7 @@
           </article>
           <article class="section-card">
             <h2>Posição de estoque</h2>
+            <!-- Inventário: Tudo o que tem no estoque e qual o valor financeiro dele imobilizado -->
             <div class="table-card">
               <table>
                 <thead><tr><th>SKU</th><th>Produto</th><th>Qtd.</th><th>Preço unit.</th><th>Valor total</th></tr></thead>
@@ -128,6 +151,7 @@
           </article>
         </section>
 
+        <!-- === ABA: CLIENTES === -->
         <section class="report-panel" data-panel="clientes" hidden>
           <div class="panel-grid">
             <article class="section-card">
@@ -155,10 +179,12 @@
           </article>
         </section>
 
+        <!-- === ABA: EQUIPE (Vendedores) === -->
         <section class="report-panel" data-panel="equipe" hidden>
           <div class="panel-grid">
             <article class="section-card">
               <h2>Desempenho por vendedor</h2>
+              <!-- Quem vendeu mais no período -->
               <div class="table-card">
                 <table>
                   <thead><tr><th>Vendedor</th><th>Vendas</th><th>Faturamento</th></tr></thead>
@@ -178,6 +204,7 @@
           </div>
         </section>
 
+        <!-- === ABA: OPERACIONAL === -->
         <section class="report-panel" data-panel="operacional" hidden>
           <div class="panel-grid panel-grid-3">
             <article class="section-card">
@@ -190,10 +217,12 @@
             </article>
             <article class="section-card">
               <h2>Referência rápida</h2>
+              <!-- Estatísticas de curiosidade geral -->
               <ul class="stat-list" id="opsReference"></ul>
             </article>
           </div>
         </section>
+        
       </div>
     </main>
   </div>

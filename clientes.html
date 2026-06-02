@@ -4,10 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clientes - Zyon ERP</title>
+  
+  <!-- Estilos Globais -->
   <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
+  
+  <!-- ================= LAYOUT PRINCIPAL ================= -->
   <div class="layout">
+    
+    <!-- ================= BARRA LATERAL (SIDEBAR) ================= -->
     <nav class="sidebar">
       <div class="sidebar-header js-company-name">Zyon ERP</div>
       <ul class="nav-list">
@@ -23,30 +29,39 @@
       </ul>
     </nav>
 
+    <!-- ================= ÁREA DE CONTEÚDO PRINCIPAL ================= -->
     <main class="main-content">
+      
+      <!-- BARRA SUPERIOR (Topbar) -->
       <header class="topbar">
         <span class="app-title js-company-name">Zyon ERP</span>
         <span id="clock"></span>
       </header>
 
-      <!-- CABEÇALHO: título da página + botão para cadastrar novo cliente -->
+      <!-- CABEÇALHO DA PÁGINA -->
       <div class="page-header">
         <h1>Clientes</h1>
         <button class="btn-primary" onclick="window.location.href='cadastros.html'">Ir para Cadastros</button>
       </div>
 
-      <!-- BARRA DE PESQUISA: filtra clientes por nome, contato ou documento -->
+      <!-- ================= AVISO DE MIGRAÇÃO ================= 
+           NOTA DO DESENVOLVEDOR: 
+           Esta tela (clientes.html) foi deprecada/desativada porque o sistema 
+           agora usa a tela centralizada de "cadastros.html". 
+           Mantivemos o código visual abaixo caso queira reverter no futuro,
+           mas o JavaScript no final do arquivo força o redirecionamento.
+      -->
+
+      <!-- BARRA DE PESQUISA (Código Legado) -->
       <div class="search-container">
         <div class="search-input-wrapper">
-          <!-- Ícone de lupa dentro do campo de busca -->
           <span class="search-icon">🔍</span>
           <input id="clientSearch" type="text" placeholder="Buscar por nome, contato ou documento...">
         </div>
-        <!-- Botão para limpar o filtro e exibir todos os clientes -->
         <button id="clearClientSearch" class="btn-secondary">Limpar</button>
       </div>
 
-      <!-- CARD DA TABELA: exibe a lista de clientes com ações -->
+      <!-- CARD DA TABELA (Código Legado) -->
       <div class="table-card">
         <table>
           <thead>
@@ -57,16 +72,21 @@
               <th>Ações</th>
             </tr>
           </thead>
-          <!-- Corpo da tabela preenchido dinamicamente pelo JS (clientes.js) -->
           <tbody id="clientsTableBody"></tbody>
         </table>
       </div>
+      
     </main>
   </div>
 
+  <!-- ================= SCRIPT DE REDIRECIONAMENTO IMEDIATO ================= 
+       Assim que a tela abre, o navegador é forçado a ir para cadastros.html
+       direto na aba de clientes. 
+  -->
   <script>
     window.location.replace('cadastros.html#clientes');
   </script>
+  
   <script src="js/auth.js"></script>
   <script src="js/session.js"></script>
   <script src="js/app.js"></script>

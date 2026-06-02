@@ -4,10 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estoque - Zyon ERP</title>
+  
+  <!-- Estilos Globais -->
   <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
+
+  <!-- ================= LAYOUT PRINCIPAL ================= -->
   <div class="layout">
+    
+    <!-- ================= BARRA LATERAL (SIDEBAR) ================= -->
     <nav class="sidebar">
       <div class="sidebar-header js-company-name">Zyon ERP</div>
       <ul class="nav-list">
@@ -23,7 +29,10 @@
       </ul>
     </nav>
 
+    <!-- ================= ÁREA DE CONTEÚDO PRINCIPAL ================= -->
     <main class="main-content">
+      
+      <!-- BARRA SUPERIOR (Topbar) -->
       <header class="topbar">
         <span class="app-title">Estoque - <span class="js-company-name">Zyon ERP</span></span>
         <span id="clock"></span>
@@ -32,19 +41,24 @@
       <!-- CABEÇALHO: título + badge de alerta para estoque baixo -->
       <div class="page-header">
         <h1>Gestão de Estoque</h1>
-        <!-- Badge vermelho que aparece apenas quando há produtos com quantidade abaixo do limite -->
+        <!-- Badge vermelho que aparece apenas quando há produtos com quantidade abaixo do limite 
+             (A lógica deste aviso está em js/estoque.js)
+        -->
         <div class="status-badge status-inactive" id="lowStockBadge">Baixo estoque: <span id="lowStockCount">0</span></div>
       </div>
 
-      <!-- NAVEGAÇÃO POR ABAS: Produtos (gestão de itens) e Pedidos (recepção de mercadorias) -->
+      <!-- ================= NAVEGAÇÃO POR ABAS (TABS) ================= -->
       <div class="tabs" id="estoqueTabs">
+        <!-- Produtos: Onde a gente cadastra um novo item -->
         <button class="tab active" data-tab="produtos">Produtos</button>
+        <!-- Pedidos: Onde a gente compra de fornecedor para abastecer a quantidade -->
         <button class="tab" data-tab="pedidos">Pedidos</button>
       </div>
 
       <div id="tabContent">
-        <!-- ABA PRODUTOS: formulário de cadastro + tabela de produtos -->
+        <!-- ================= ABA PRODUTOS ================= -->
         <div id="tabProdutos">
+          
           <!-- FORMULÁRIO DE CADASTRO DE PRODUTO -->
           <div class="main-area" style="margin-bottom: 1.5rem;">
             <form id="productForm">
@@ -60,11 +74,11 @@
               </div>
               <div class="row">
                 <div class="form-group" style="flex:1;">
-                  <label for="precoProduto">Preço</label>
+                  <label for="precoProduto">Preço (de Venda)</label>
                   <input id="precoProduto" type="number" step="0.01" min="0.01" required>
                 </div>
                 <div class="form-group" style="flex:1;">
-                  <label for="qtdProduto">Quantidade</label>
+                  <label for="qtdProduto">Quantidade (Atual)</label>
                   <input id="qtdProduto" type="number" min="0" required>
                 </div>
                 <div class="form-group" style="display:flex; align-items:flex-end;">
@@ -74,7 +88,7 @@
             </form>
           </div>
 
-          <!-- TABELA DE PRODUTOS COM ESTOQUE -->
+          <!-- TABELA DE ESTOQUE (Listagem de Produtos) -->
           <table>
             <thead>
               <tr>
@@ -90,15 +104,15 @@
           </table>
         </div>
 
-        <!-- ABA PEDIDOS: gestão de pedidos de compra/reposição de estoque -->
+        <!-- ================= ABA PEDIDOS (DE REPOSIÇÃO) ================= -->
         <div id="tabPedidos" style="display:none">
           <div class="page-header" style="margin-bottom:1.5rem">
             <h2>Pedidos de Estoque</h2>
-            <!-- Botão abre o modal para criar um novo pedido de compra -->
+            <!-- Botão abre o modal para criar um novo pedido de compra junto ao fornecedor -->
             <button class="btn-primary" id="btnNewOrder">+ Novo Pedido</button>
           </div>
 
-          <!-- TABELA DE PEDIDOS: lista todos os pedidos com status e ações -->
+          <!-- TABELA DE PEDIDOS: Lista os pedidos com status (Ex: Pendente, Recebido) -->
           <div class="table-card">
             <table>
               <thead>
@@ -120,12 +134,15 @@
     </main>
   </div>
 
-  <!-- MODAL DE PEDIDO: usado para criar ou editar pedidos de estoque -->
+  <!-- ================= MODAL DE NOVO PEDIDO DE COMPRA ================= 
+       Abre quando o usuário clica em "+ Novo Pedido" na aba de Pedidos.
+  -->
   <div class="modal" id="orderModal">
     <div class="modal-content" style="max-width:700px">
       <h2 id="modalTitle">Novo Pedido de Estoque</h2>
       <form id="orderForm">
-        <!-- SELEÇÃO DO FORNECEDOR (carregado dos cadastros) -->
+        
+        <!-- SELEÇÃO DO FORNECEDOR (Vem do js/cadastros.js) -->
         <div class="form-group">
           <label for="orderSupplier">Fornecedor *</label>
           <select id="orderSupplier" required>
@@ -133,24 +150,28 @@
           </select>
         </div>
 
-        <!-- LISTA DE ITENS DO PEDIDO (dinâmica: é possível adicionar/remover linhas) -->
+        <!-- LISTA DE ITENS DO PEDIDO (Pode adicionar múltiplas linhas de produtos para comprar) -->
         <div class="form-group">
           <label>Itens do Pedido</label>
           <div id="orderItems">
-            <!-- Linha padrão de item: select de produto + quantidade + preço unitário + botão remover -->
+            
+            <!-- Linha padrão (Template de item a ser injetado/clonado pelo JS) -->
             <div class="row order-item" style="align-items:center">
               <select class="item-product" style="flex:2;padding:0.75rem;border:1px solid var(--border);border-radius:8px" required>
                 <option value="">Selecione o produto...</option>
               </select>
               <input type="number" class="item-qty" placeholder="Qtd" min="1" value="1" style="flex:0.5;padding:0.75rem;border:1px solid var(--border);border-radius:8px" required>
+              <!-- Preço de Custo (Comprou por quanto?) -->
               <input type="number" class="item-price" placeholder="Preço unit." step="0.01" min="0.01" style="flex:0.7;padding:0.75rem;border:1px solid var(--border);border-radius:8px" required>
               <button type="button" class="remove-item-btn" title="Remover item" style="flex:0;background:none;border:none;font-size:1.3rem;cursor:pointer;padding:0.5rem">✕</button>
             </div>
           </div>
+          
+          <!-- Adicionar nova linha no pedido -->
           <button type="button" class="btn-secondary" id="addItemBtn" style="margin-top:0.5rem">+ Adicionar Item</button>
         </div>
 
-        <!-- BOTÕES DO MODAL: cancelar ou salvar o pedido -->
+        <!-- BOTÕES DO MODAL -->
         <div class="modal-actions">
           <button type="button" class="btn-secondary" id="cancelOrderBtn">Cancelar</button>
           <button type="submit" class="btn-primary">Salvar Pedido</button>
@@ -159,6 +180,7 @@
     </div>
   </div>
 
+  <!-- ================= CARREGAMENTO DOS SCRIPTS ================= -->
   <script src="js/auth.js"></script>
   <script src="js/session.js"></script>
   <script src="js/app.js"></script>

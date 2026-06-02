@@ -7,7 +7,11 @@
   <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
+
+  <!-- ================= LAYOUT PRINCIPAL ================= -->
   <div class="layout">
+    
+    <!-- ================= BARRA LATERAL (SIDEBAR) ================= -->
     <nav class="sidebar">
       <div class="sidebar-header js-company-name">Zyon ERP</div>
       <ul class="nav-list">
@@ -22,7 +26,10 @@
       </ul>
     </nav>
 
+    <!-- ================= ÁREA DE CONTEÚDO PRINCIPAL ================= -->
     <main class="main-content">
+      
+      <!-- BARRA SUPERIOR (Topbar) -->
       <header class="topbar">
         <div>
           <span class="app-title">Configurações</span>
@@ -31,22 +38,31 @@
         <span id="clock" class="topbar-clock"></span>
       </header>
 
+      <!-- ================= FORMULÁRIO DE CONFIGURAÇÕES ================= -->
       <div class="section-card">
         <h2>Preferências gerais</h2>
         <form id="settingsForm">
+          
+          <!-- CAMPO: Nome Fantasia (Vai alterar o logo em todas as telas) -->
           <div class="form-group">
             <label for="companyName">Nome da empresa (exibição)</label>
             <input id="companyName" type="text" required>
           </div>
+          
+          <!-- CAMPO: Gatilho de Estoque Baixo (Se cair abaixo disso, fica vermelho) -->
           <div class="form-group">
             <label for="lowStockThreshold">Limite de estoque baixo</label>
             <input id="lowStockThreshold" type="number" min="0" required>
           </div>
+          
+          <!-- BOTÃO SALVAR -->
           <div class="modal-actions">
             <button type="submit" class="btn-primary">Salvar configurações</button>
           </div>
+          
         </form>
       </div>
+      
     </main>
   </div>
 

@@ -4,10 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fiscal - Zyon ERP</title>
+  
+  <!-- Estilos Globais -->
   <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
+
+  <!-- ================= LAYOUT PRINCIPAL ================= -->
   <div class="layout">
+    
+    <!-- ================= BARRA LATERAL (SIDEBAR) ================= -->
     <nav class="sidebar">
       <div class="sidebar-header js-company-name">Zyon ERP</div>
       <ul class="nav-list">
@@ -22,7 +28,10 @@
       </ul>
     </nav>
 
+    <!-- ================= ÁREA DE CONTEÚDO PRINCIPAL ================= -->
     <main class="main-content">
+      
+      <!-- BARRA SUPERIOR (Topbar) -->
       <header class="topbar">
         <div>
           <span class="app-title">Fiscal / NF-e</span>
@@ -31,6 +40,7 @@
         <span id="clock" class="topbar-clock"></span>
       </header>
 
+      <!-- ================= CARDS DE INDICADORES FISCAIS (KPIs) ================= -->
       <section class="kpi-cards">
         <div class="card card-blue"><h3>Notas autorizadas</h3><p id="fiscalKpiNotes">0</p></div>
         <div class="card card-purple"><h3>Notas canceladas</h3><p id="fiscalKpiCancelled">0</p></div>
@@ -38,24 +48,30 @@
         <div class="card card-green"><h3>Valor autorizado</h3><p id="fiscalKpiTotal">R$ 0,00</p></div>
       </section>
 
+      <!-- ================= ÁREA DE EMISSÃO DE NOTA ================= -->
       <div class="section-card">
         <div class="page-header" style="margin-bottom:1rem">
           <h2>Emitir NF-e (simulação)</h2>
           <button type="button" class="btn-secondary" id="openFiscalConfigBtn">⚙️ Configurações do emitente</button>
         </div>
+        
+        <!-- Selecionar qual venda precisa de nota fiscal -->
         <div class="row">
           <div class="form-group" style="flex:2">
             <label for="salesSelect">Venda pendente de documento fiscal</label>
+            <!-- Este select só mostrará vendas que ainda não possuem nota -->
             <select id="salesSelect"></select>
           </div>
         </div>
 
+        <!-- Campos que aparecem apenas depois que uma venda é selecionada -->
         <div id="noteEmissionFields" hidden>
           <div class="form-group">
             <label for="noteNatureza">Natureza da operação desta nota *</label>
             <input id="noteNatureza" type="text" maxlength="60" placeholder="Ex.: Venda de mercadoria adquirida de terceiros">
             <p class="field-hint">Obrigatório por nota (10 a 60 caracteres). Varia conforme o tipo de operação.</p>
           </div>
+          
           <div class="form-group">
             <label>CFOP por item (desta nota)</label>
             <div class="table-card">
@@ -67,6 +83,7 @@
                     <th>CFOP *</th>
                   </tr>
                 </thead>
+                <!-- Lista de itens da venda selecionada com campos para digitar o CFOP -->
                 <tbody id="noteItemsCfopBody"></tbody>
               </table>
             </div>
@@ -74,6 +91,7 @@
           </div>
         </div>
 
+        <!-- Botões de ação da nota -->
         <div class="form-group" style="display:flex;align-items:flex-end;gap:0.5rem;flex-wrap:wrap;margin-top:1rem">
           <button id="previewNoteBtn" class="btn-secondary" type="button" disabled>Pré-visualizar DANFE</button>
           <button id="emitNoteBtn" class="btn-primary" type="button" disabled>Transmitir à SEFAZ</button>
@@ -81,6 +99,9 @@
         <p class="field-hint">A transmissão é simulada: gera chave de acesso, protocolo e XML fictício para fins didáticos.</p>
       </div>
 
+      <!-- ================= PREVIEW DA DANFE ================= 
+           Aparece quando clica em Pré-visualizar (desenha o documento fiscal)
+      -->
       <div id="danfePreview" class="danfe-preview section-card" hidden>
         <div class="danfe-header">
           <div>
@@ -89,16 +110,21 @@
           </div>
           <div class="danfe-meta" id="danfeMeta"></div>
         </div>
+        
         <div class="danfe-grid">
+          <!-- Dados do Emitente (A loja) -->
           <div class="danfe-block">
             <h3>Emitente</h3>
             <div id="danfeEmitter"></div>
           </div>
+          <!-- Dados do Cliente -->
           <div class="danfe-block">
             <h3>Destinatário</h3>
             <div id="danfeCustomer"></div>
           </div>
         </div>
+        
+        <!-- Produtos da Nota -->
         <div class="table-card">
           <table>
             <thead>
@@ -114,9 +140,11 @@
             <tbody id="danfeItemsBody"></tbody>
           </table>
         </div>
+        
         <div class="danfe-totals" id="danfeTotals"></div>
       </div>
 
+      <!-- ================= HISTÓRICO DE NOTAS EMITIDAS ================= -->
       <section class="section-card">
         <h2>Histórico de NF-e</h2>
         <div class="table-card">
@@ -136,9 +164,13 @@
           </table>
         </div>
       </section>
+      
     </main>
   </div>
 
+  <!-- ================= MODAIS (Popups) DA TELA FISCAL ================= -->
+
+  <!-- Modal: Configuração do Emitente -->
   <div class="modal" id="fiscalConfigModal">
     <div class="modal-content" style="max-width:640px">
       <h2>Configurações do emitente NF-e</h2>
@@ -174,6 +206,7 @@
     </div>
   </div>
 
+  <!-- Modal: Animação Simulação de Transmissão SEFAZ -->
   <div class="modal" id="transmitModal">
     <div class="modal-content fiscal-transmit-modal">
       <h2>Transmissão NF-e</h2>
@@ -190,6 +223,7 @@
     </div>
   </div>
 
+  <!-- Modal: Cancelamento de NF-e -->
   <div class="modal" id="cancelNoteModal">
     <div class="modal-content fiscal-transmit-modal">
       <h2>Cancelar NF-e</h2>
@@ -199,6 +233,7 @@
         <textarea id="cancelJustification" rows="4" maxlength="255"
           placeholder="Informe o motivo (mín. 15 caracteres). Ex.: Venda devolvida pelo cliente."></textarea>
       </div>
+      <!-- Animação do cancelamento -->
       <ul class="transmit-steps" id="cancelSteps">
         <li data-step="validate">Validando evento de cancelamento...</li>
         <li data-step="sign">Assinando evento XML...</li>
@@ -213,12 +248,15 @@
     </div>
   </div>
 
+  <!-- Modal: Ver detalhes de uma nota já emitida na tabela -->
   <div class="modal" id="noteDetailModal">
     <div class="modal-content" style="max-width:900px;max-height:90vh;overflow:auto">
       <h2>Detalhes da NF-e</h2>
+      <!-- A DANFE da nota é copiada pra cá via JavaScript -->
       <div id="noteDetailContent"></div>
       <div class="modal-actions">
         <button type="button" class="btn-secondary" id="closeNoteDetailBtn">Fechar</button>
+        <!-- Atalho pra cancelar se estiver vendo os detalhes -->
         <button type="button" class="btn-red" id="cancelFromDetailBtn" hidden>Cancelar NF-e</button>
       </div>
     </div>

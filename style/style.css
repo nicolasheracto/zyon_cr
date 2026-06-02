@@ -1,32 +1,48 @@
-/* ===== VARIÁVEIS GLOBAIS (CSS Custom Properties) ===== */
+/* ==========================================================
+   ESTILOS GLOBAIS (STYLE.CSS)
+   - Contém todas as variáveis de cores do ERP.
+   - Define a estrutura visual de botões, tabelas, modais e abas.
+   - Arquitetura baseada no Flexbox/Grid para Layout Responsivo.
+========================================================== */
+
+/* ===== VARIÁVEIS GLOBAIS (CSS Custom Properties) ===== 
+   Usadas em todo o sistema. Se quiser mudar a cor primária,
+   basta trocar o valor de --royal aqui, e o sistema inteiro mudará.
+*/
 :root {
-  /* Paleta de cores do Zyon ERP */
-  --navy: #151b26;        /* Fundo escuro da barra lateral */
+  /* Paleta de Cores */
+  --navy: #151b26;        /* Fundo escuro da barra lateral (Sidebar) */
   --navy-light: #1e293b;  /* Fundo de modais e painéis escuros */
-  --royal: #2563eb;       /* Azul primário (botões, links ativos, foco) */
+  --royal: #2563eb;       /* Azul primário (botões principais, links ativos, inputs em foco) */
   --royal-hover: #1d4ed8; /* Tom mais escuro para hover do azul primário */
-  --green: #10b981;       /* Verde para status OK, sucesso, troco */
-  --yellow: #f59e0b;      /* Amarelo/laranja para botão de acréscimo */
-  --purple: #6366f1;      /* Roxo para botão de desconto */
-  --red: #ef4444;         /* Vermelho para botão cancelar, estoque baixo */
-  --gray-bg: #f3f4f6;     /* Cinza claro para fundo da área principal */
-  --white: #ffffff;       /* Branco para cards, tabelas, formulários */
-  --text-dark: #1f2937;   /* Cor principal do texto (quase preto) */
-  --text-light: #6b7280;  /* Cor secundária do texto (cinza) */
-  --border: #e5e7eb;      /* Cor das bordas de inputs, tabelas, cards */
-  --radius: 12px;          /* Raio de borda arredondado padrão */
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Sombra suave para cards */
-  --transition: 0.3s ease; /* Transição padrão para hovers e interações */
+  
+  --green: #10b981;       /* Verde para status de sucesso, ativo, notas autorizadas */
+  --yellow: #f59e0b;      /* Amarelo/laranja (ex: botão de acréscimo) */
+  --purple: #6366f1;      /* Roxo (ex: botão de desconto) */
+  --red: #ef4444;         /* Vermelho (ex: botão cancelar, status inativo, alertas) */
+  
+  --gray-bg: #f3f4f6;     /* Cinza claro para o fundo da área principal de trabalho */
+  --white: #ffffff;       /* Branco puro para os cartões (cards), tabelas, modais */
+  
+  --text-dark: #1f2937;   /* Cor principal do texto (quase preto, para não cansar a vista) */
+  --text-light: #6b7280;  /* Cor secundária do texto (cinza para labels, dicas, cabeçalhos de tabela) */
+  --border: #e5e7eb;      /* Cor padrão para as linhas que dividem os elementos */
+  
+  /* Formas e Efeitos */
+  --radius: 12px;          /* Raio de borda (arredondamento) padrão dos cards */
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Sombra suave para dar profundidade */
+  --transition: 0.3s ease; /* Tempo e tipo de transição padrão para animações de hover */
 }
 
-/* Reset geral: remove margens/paddings e define box-sizing border-box */
+/* ==========================================================
+   RESET CSS & TIPOGRAFIA BASE
+========================================================== */
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  box-sizing: border-box; /* O padding não aumenta o tamanho total do elemento */
 }
 
-/* Estilo base do body: fonte, cor de fundo e texto */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: var(--gray-bg);
@@ -34,19 +50,29 @@ body {
   line-height: 1.6;
 }
 
-/* Remove sublinhado e herda cor dos links */
-a { text-decoration: none; color: inherit; }
+/* Remove sublinhado padrão dos links */
+a { 
+  text-decoration: none; 
+  color: inherit; 
+}
 
-/* ===== PÁGINA DE LOGIN ===== */
+/* ==========================================================
+   PÁGINA DE LOGIN (index.html)
+========================================================== */
 .login-page {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: var(--navy); /* Fundo escuro característico */
+  background: var(--navy); 
   padding: 1rem;
 }
-.login-container { width: 100%; max-width: 400px; } /* Limita largura do card */
+
+.login-container { 
+  width: 100%; 
+  max-width: 400px; 
+}
+
 .login-card {
   background: var(--white);
   border-radius: var(--radius);
@@ -54,10 +80,33 @@ a { text-decoration: none; color: inherit; }
   padding: 2rem;
   text-align: center;
 }
-.login-card h1 { color: var(--navy); margin-bottom: 1rem; }
-.logo-img { max-width: 120px; margin-bottom: 1rem; }
-.server-status { margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-light); }
-.status-indicator.green { display: inline-block; width: 10px; height: 10px; background: var(--green); border-radius: 50%; margin-right: 5px; }
+
+.login-card h1 { 
+  color: var(--navy); 
+  margin-bottom: 1rem; 
+}
+
+.logo-img { 
+  max-width: 120px; 
+  margin-bottom: 1rem; 
+}
+
+.server-status { 
+  margin-bottom: 1.5rem; 
+  font-size: 0.9rem; 
+  color: var(--text-light); 
+}
+
+.status-indicator.green { 
+  display: inline-block; 
+  width: 10px; 
+  height: 10px; 
+  background: var(--green); 
+  border-radius: 50%; 
+  margin-right: 5px; 
+}
+
+/* Caixa vermelha para erros de login */
 .login-error {
   margin-bottom: 1rem;
   padding: 0.65rem 0.85rem;
@@ -68,59 +117,96 @@ a { text-decoration: none; color: inherit; }
   border: 1px solid #fecaca;
   border-radius: 8px;
 }
-.login-error[hidden] { display: none; }
-
-/* ===== LAYOUT PRINCIPAL (Sidebar + Main) ===== */
-.layout {
-  display: flex;
-  height: 100vh;        /* Ocupa a altura total da viewport */
-  overflow: hidden;     /* Impede scroll duplicado (scroll apenas no main) */
+.login-error[hidden] { 
+  display: none; 
 }
 
-/* SIDEBAR: navegação fixa à esquerda */
+/* ==========================================================
+   LAYOUT PRINCIPAL (Sidebar + Main Content)
+========================================================== */
+
+/* Engloba a tela inteira */
+.layout {
+  display: flex;
+  height: 100vh;        /* Preenche a tela verticalmente */
+  overflow: hidden;     /* Bloqueia scroll na tela inteira */
+}
+
+/* SIDEBAR: O Menu fixo na esquerda */
 .sidebar {
   width: 250px;
   background: var(--navy);
   color: var(--white);
   padding: 1.5rem 1rem;
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Deixa os itens empilhados de cima para baixo */
 }
-.sidebar-header { font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem; color: var(--white); }
+
+.sidebar-header { 
+  font-size: 1.5rem; 
+  font-weight: bold; 
+  margin-bottom: 2rem; 
+  color: var(--white); 
+}
+
 .nav-list { list-style: none; }
 .nav-list li a {
-  display: flex; align-items: center; gap: 10px;
-  padding: 0.8rem 1rem; color: #9ca3af; text-decoration: none;
-  border-radius: 8px; margin-bottom: 0.5rem; transition: var(--transition);
+  display: flex; 
+  align-items: center; 
+  gap: 10px;
+  padding: 0.8rem 1rem; 
+  color: #9ca3af; 
+  text-decoration: none;
+  border-radius: 8px; 
+  margin-bottom: 0.5rem; 
+  transition: var(--transition);
 }
-.nav-list li a:hover, .nav-list li a.active {
-  background: var(--royal); color: var(--white);
-}
-.nav-list li a.logout { margin-top: auto; color: #fca5a5; }
-.nav-list li a.logout:hover { background: rgba(239, 68, 68, 0.2); color: #fecaca; }
 
-/* CONTEÚDO PRINCIPAL: área scrollável à direita da sidebar */
+.nav-list li a:hover, 
+.nav-list li a.active {
+  background: var(--royal); 
+  color: var(--white);
+}
+
+/* O botão de sair fica preso no final da sidebar */
+.nav-list li a.logout { 
+  margin-top: auto; 
+  color: #fca5a5; 
+}
+.nav-list li a.logout:hover { 
+  background: rgba(239, 68, 68, 0.2); 
+  color: #fecaca; 
+}
+
+/* ÁREA PRINCIPAL DE TRABALHO: onde as telas são carregadas */
 .main-content {
-  flex: 1;
+  flex: 1;              /* Ocupa o restante do espaço lateral */
   display: flex;
   flex-direction: column;
-  overflow-y: auto;     /* Scroll apenas no conteúdo, sidebar fica fixa */
+  overflow-y: auto;     /* Permite scroll APENAS aqui dentro (barra lateral fica fixa) */
   padding: 1rem 2rem;
 }
+
+/* TOPBAR: Cabeçalho superior (Nome da Empresa, Relógio, etc) */
 .topbar {
   display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
   padding: 1rem 1.5rem; background: var(--white);
   border-radius: var(--radius); box-shadow: var(--shadow);
   margin-bottom: 1.5rem;
 }
+
 .topbar .app-title { display: block; font-size: 1.25rem; font-weight: 700; color: var(--navy); }
 .topbar-clock { font-size: 0.9rem; color: var(--text-light); white-space: nowrap; padding-top: 0.15rem; }
 .page-lead { font-size: 0.9rem; color: var(--text-light); margin-top: 0.25rem; }
+
+/* Headers das seções de conteúdo */
 .page-header {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;
 }
 .page-header h2 { font-size: 1.15rem; color: var(--navy); }
 .table-section { margin-bottom: 2rem; }
+
+/* Cards Genéricos de Conteúdo */
 .section-card {
   background: var(--white); border-radius: var(--radius); padding: 1.5rem;
   box-shadow: var(--shadow); margin-bottom: 1.5rem;
@@ -128,10 +214,13 @@ a { text-decoration: none; color: inherit; }
 .section-card h2 { font-size: 1.05rem; color: var(--navy); margin-bottom: 1rem; }
 .table-empty { text-align: center; color: var(--text-light); font-style: italic; }
 
-/* ===== CARDS DE INDICADORES (KPIs) ===== */
+
+/* ==========================================================
+   CARDS DE INDICADORES (KPIs)
+========================================================== */
 .kpi-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Quebra de linha responsiva */
   gap: 1rem;
   margin-bottom: 2rem;
 }
@@ -141,100 +230,144 @@ a { text-decoration: none; color: inherit; }
 }
 .card h3 { font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem; }
 .card p { font-size: 1.8rem; font-weight: bold; }
+
 /* Cores da borda superior de cada card KPI */
 .card-blue { border-top-color: var(--royal); }
 .card-green { border-top-color: var(--green); }
 .card-yellow { border-top-color: var(--yellow); }
 .card-purple { border-top-color: var(--purple); }
 
-/* ===== TABELAS ===== */
-table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
-th { background: #f9fafb; font-weight: 600; color: var(--text-light); text-transform: uppercase; font-size: 0.85rem; }
-tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
 
-/* ===== FORMULÁRIOS E BOTÕES ===== */
+/* ==========================================================
+   TABELAS
+========================================================== */
+table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  background: var(--white); 
+  border-radius: var(--radius); 
+  overflow: hidden; 
+  box-shadow: var(--shadow); 
+}
+
+th, td { 
+  padding: 1rem; 
+  text-align: left; 
+  border-bottom: 1px solid var(--border); 
+}
+
+th { 
+  background: #f9fafb; 
+  font-weight: 600; 
+  color: var(--text-light); 
+  text-transform: uppercase; 
+  font-size: 0.85rem; 
+}
+
+tr:hover { 
+  background: #f8fafc; /* Efeito hover zebrado para facilitar leitura */
+}
+
+
+/* ==========================================================
+   FORMULÁRIOS, INPUTS E BOTÕES
+========================================================== */
 .form-group { margin-bottom: 1rem; text-align: left; }
 .form-group label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--text-dark); }
 .form-group input, .form-group select {
   width: 100%; padding: 0.75rem; border: 1px solid var(--border);
   border-radius: 8px; font-size: 0.95rem; outline: none;
 }
-.form-group input:focus { border-color: var(--royal); } /* Destaque ao focar */
+.form-group input:focus { border-color: var(--royal); } /* Borda azul ao focar (digitar) */
 .form-group input.input-invalid { border-color: var(--red); }
 
-/* Botões primário (azul) e secundário (cinza) */
+/* Padrões de Botões */
 .btn-primary, .btn-secondary {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 0.75rem 1.5rem; border: none; border-radius: 8px;
   font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: var(--transition);
 }
+
 .btn-primary { background: var(--royal); color: var(--white); }
 .btn-primary:hover { background: var(--royal-hover); }
+
 .btn-secondary { background: var(--gray-bg); color: var(--text-dark); border: 1px solid var(--border); }
+.btn-secondary:hover { background: #e5e7eb; }
+
 .btn-red {
   background: var(--red); color: var(--white); border: none; border-radius: 8px;
   padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer;
 }
 .btn-red:hover { filter: brightness(0.92); }
 .btn-red:disabled { opacity: 0.5; cursor: not-allowed; }
+
 .form-group textarea {
   width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;
   font-size: 0.95rem; font-family: inherit; resize: vertical; min-height: 90px;
 }
 .form-group textarea:focus { outline: none; border-color: var(--royal); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-.danfe-cancelled-banner {
-  background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
-  padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 600;
+
+/* ==========================================================
+   MODAIS (Janelas Flutuantes/Diálogos)
+========================================================== */
+.modal {
+  display: none; 
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  justify-content: center; align-items: center; 
+  z-index: 1000; 
+  backdrop-filter: blur(3px); /* Efeito de vidro na tela de trás */
 }
 
-/* ===== MODAIS (Janelas de diálogo) ===== */
-.modal {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-  justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px);
-}
 .modal-content {
   background: var(--white); border-radius: var(--radius); padding: 2rem;
   width: 90%; max-width: 600px; box-shadow: var(--shadow); position: relative;
 }
+
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.5rem; }
 
-/* ===== ABAS (Tabs) ===== */
+
+/* ==========================================================
+   SISTEMA DE NAVEGAÇÃO INTERNA (Abas / Tabs)
+========================================================== */
 .tabs { display: flex; gap: 10px; margin-bottom: 1.5rem; border-bottom: none; }
 .tab { 
   background: var(--gray-bg); border: none; padding: 10px 20px; 
   border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-light);
 }
-.tab.active { background: var(--royal); color: var(--white); } /* Aba selecionada */
+.tab.active { background: var(--royal); color: var(--white); } 
 
-/* ===== TELA DE PDV (VENDAS) ===== */
+
+/* ==========================================================
+   COMPONENTES ESPECÍFICOS (Telas de Negócio)
+========================================================== */
+
+/* --- TELA DE PDV (CAIXA / VENDAS) --- */
 .main-area { background: var(--white); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); }
-.row { display: flex; gap: 15px; margin-bottom: 1rem; } /* Linha flexível para formulários */
+.row { display: flex; gap: 15px; margin-bottom: 1rem; } 
 .search-input { width: 100%; padding: 1rem; font-size: 1rem; border: 2px solid var(--royal); border-radius: 8px; margin-bottom: 1.5rem; }
 .summary { text-align: right; font-size: 1.1rem; margin-top: 1.5rem; }
 .summary .total { font-size: 2rem; font-weight: bold; color: var(--text-dark); }
 
-/* Botões de ação do PDV em grid de 2 colunas */
+/* Teclado/Ações do PDV (Acréscimo, Desconto, etc) */
 .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1.5rem; }
 .action-buttons button { padding: 1.2rem; font-weight: bold; border-radius: 8px; border: none; color: white; cursor: pointer; text-transform: uppercase; }
-.btn-orange { background: var(--yellow); }    /* Acréscimo */
-.btn-purple { background: var(--purple); }    /* Desconto */
-.btn-red { background: var(--red); }          /* Cancelar */
+.btn-orange { background: var(--yellow); }    
+.btn-purple { background: var(--purple); }    
 .btn-blue { background: var(--royal); }
-.btn-green-full { background: var(--green); grid-column: span 2; } /* Finalizar (ocupa 2 colunas) */
+.btn-green-full { background: var(--green); grid-column: span 2; } /* O botão finalizar ocupa a largura de 2 botões */
 
-/* ===== MODAL DE CHECKOUT DO PDV ===== */
+/* --- MODAL DE CHECKOUT (Pagamento) --- */
 .checkout-modal .modal-content {
   display: flex; padding: 0; max-width: 900px; height: 600px; overflow: hidden; background: transparent;
 }
-.checkout-left {
+.checkout-left { /* Metade escura (Resumo dos Itens) */
   background: var(--navy-light); color: var(--white); flex: 1; padding: 2.5rem; display: flex; flex-direction: column;
 }
 .checkout-left h2, .checkout-left p { color: #cbd5e1; }
 .checkout-left .total-box {
   background: var(--navy); padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; font-size: 2.5rem; font-weight: bold; text-align: center;
 }
-.checkout-right {
+.checkout-right { /* Metade branca (Formas de Pagamento) */
   background: var(--white); flex: 1; padding: 2.5rem; overflow-y: auto; position: relative;
 }
 .payment-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 2rem; }
@@ -244,49 +377,23 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
 }
 .payment-buttons button:hover { border-color: var(--royal); color: var(--royal); }
 
-/* ===== BARRA DE PESQUISA (com ícone de lupa dentro do input) ===== */
+
+/* --- BARRA DE PESQUISA (Search Bar com Lupa Dinâmica) --- */
 .search-container {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 1.5rem;
-  align-items: center;
+  display: flex; gap: 15px; margin-bottom: 1.5rem; align-items: center;
 }
-.search-input-wrapper {
-  flex: 1;
-  position: relative;
-}
+.search-input-wrapper { flex: 1; position: relative; }
 .search-input-wrapper input {
   width: 100%;
-  padding: 0.9rem 1rem 0.9rem 2.5rem; /* padding extra à esquerda para o ícone */
+  padding: 0.9rem 1rem 0.9rem 2.5rem; /* Padding extra à esquerda reserva espaço pro ícone da lupa */
   border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-  color: var(--text-dark);
-  background: var(--white);
+  border-radius: 8px; font-size: 1rem; outline: none; color: var(--text-dark); background: var(--white);
 }
-.search-input-wrapper input:focus {
-  border-color: var(--royal);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-.search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-light);
-  font-size: 1.1rem;
-}
+.search-input-wrapper input:focus { border-color: var(--royal); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light); font-size: 1.1rem; }
 
-/* ===== CARD DE TABELA (com bordas arredondadas e sombra) ===== */
-.table-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
 
-/* ===== BADGES DE STATUS (ativo, inativo, baixo estoque) ===== */
+/* --- BADGES (Símbolos de Status visuais, ex: Ativo/Inativo) --- */
 .status-badge {
   padding: 6px 12px;
   border-radius: 20px;
@@ -294,44 +401,25 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
   font-weight: 600;
   display: inline-block;
 }
-.status-active {
-  background-color: #d1fae5; /* Verde claro */
-  color: #065f46;
-}
-.status-inactive {
-  background-color: #fee2e2; /* Vermelho claro */
-  color: #991b1b;
-}
+.status-active { background-color: #d1fae5; color: #065f46; } /* Verdezinho */
+.status-inactive { background-color: #fee2e2; color: #991b1b; } /* Vermelhinho */
 
-/* ===== BOTÕES DE AÇÃO NAS TABELAS (ícones clicáveis) ===== */
+
+/* --- ÍCONES DE AÇÃO NAS TABELAS --- */
 .action-btns span {
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 6px;
-  transition: background 0.2s;
-  margin-right: 5px;
+  cursor: pointer; padding: 6px; border-radius: 6px; transition: background 0.2s; margin-right: 5px;
 }
-.action-btns span:hover {
-  background: var(--gray-bg);
-}
-.action-btns .action-disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-.action-btns .action-disabled:hover {
-  background: transparent;
-}
+.action-btns span:hover { background: var(--gray-bg); }
 
-/* ===== BOTÃO REMOVER ITEM (X vermelho) ===== */
-.remove-item-btn {
-  color: var(--red);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
+/* Ícones bloqueados (ex: não pode excluir cliente que já tem venda) */
+.action-btns .action-disabled { opacity: 0.35; cursor: not-allowed; }
+.action-btns .action-disabled:hover { background: transparent; }
 
-/* ===== TOAST (Notificação flutuante) ===== */
+/* Botão específico (X vermelho) de remover itens de carrinhos ou modais */
+.remove-item-btn { color: var(--red); background: transparent; border: none; cursor: pointer; font-weight: bold; }
+
+
+/* --- TOAST (Notificações Flutuantes no canto inferior direito) --- */
 .toast {
   position: fixed;
   right: 20px;
@@ -345,12 +433,11 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
   transition: all 0.3s ease;
   z-index: 3000;
 }
-.toast.show {
-  opacity: 1;
-  transform: translateY(0);
-}
+/* Classe que o Javascript adiciona para fazer o toast aparecer */
+.toast.show { opacity: 1; transform: translateY(0); }
 
-/* ===== RELATÓRIOS ===== */
+
+/* --- TELA DE RELATÓRIOS (Dashboards Avançados) --- */
 .toolbar-card {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.25rem;
   background: var(--white); padding: 1rem 1.25rem; border-radius: var(--radius);
@@ -363,9 +450,9 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
 }
 .filter-select:focus { outline: none; border-color: var(--royal); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
 .toolbar-hint { font-size: 0.85rem; color: var(--text-light); margin-left: auto; }
-.report-tabs {
-  display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem;
-}
+
+/* Tabs do Relatório e seus Paineis ocultos/visíveis */
+.report-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
 .report-tab {
   padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: 8px;
   background: var(--white); color: var(--text-light); font-weight: 600; font-size: 0.9rem;
@@ -381,6 +468,8 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
   gap: 1.25rem; margin-bottom: 1.25rem;
 }
 .panel-grid-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+/* Listas formatadas de status textual dentro dos relatórios */
 .stat-list { list-style: none; }
 .stat-list li {
   display: flex; justify-content: space-between; align-items: center; gap: 1rem;
@@ -391,11 +480,11 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
 .stat-list li strong { color: var(--text-dark); font-weight: 600; }
 .section-card .table-card table { box-shadow: none; border-radius: 0; }
 .section-card .table-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-
 .field-hint { font-size: 0.85rem; color: var(--text-light); margin-top: 0.75rem; }
 .form-group input.input-error, .form-group select.input-error { border-color: var(--red); }
 
-/* ===== FISCAL / DANFE ===== */
+
+/* --- FISCAL / DANFE (Simulador de Nota Fiscal) --- */
 .danfe-preview { border: 2px solid var(--border); }
 .danfe-header {
   display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
@@ -403,14 +492,16 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
 }
 .danfe-badge {
   display: inline-block; background: var(--navy); color: var(--white);
-  font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 4px;
-  margin-bottom: 0.5rem;
+  font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 4px; margin-bottom: 0.5rem;
+}
+.danfe-cancelled-banner {
+  background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+  padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 600;
 }
 .danfe-meta { font-size: 0.85rem; color: var(--text-light); text-align: right; max-width: 420px; }
 .danfe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
 .danfe-block {
-  background: #f9fafb; border: 1px solid var(--border); border-radius: 8px; padding: 1rem;
-  font-size: 0.9rem;
+  background: #f9fafb; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-size: 0.9rem;
 }
 .danfe-block h3 { font-size: 0.8rem; text-transform: uppercase; color: var(--text-light); margin-bottom: 0.5rem; }
 .danfe-totals {
@@ -420,6 +511,8 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
 .danfe-total-line { font-size: 1.15rem; margin-top: 0.5rem; color: var(--navy); }
 .chave-cell { font-family: Consolas, monospace; font-size: 0.8rem; max-width: 200px; }
 .fiscal-transmit-modal { max-width: 480px; }
+
+/* Animação falsa de Sefaz autorizando */
 .transmit-steps { list-style: none; margin: 1rem 0; }
 .transmit-steps li {
   padding: 0.65rem 0.75rem; margin-bottom: 0.5rem; border-radius: 8px;
@@ -430,6 +523,10 @@ tr:hover { background: #f8fafc; } /* Efeito hover nas linhas */
 .transmit-result { margin: 1rem 0; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; }
 .transmit-result.success { background: #d1fae5; color: #065f46; }
 
+
+/* ==========================================================
+   MEDIA QUERIES (Design Responsivo para Celulares/Tablets)
+========================================================== */
 @media (max-width: 768px) {
   .main-content { padding: 1rem; }
   .toolbar-hint { margin-left: 0; width: 100%; }

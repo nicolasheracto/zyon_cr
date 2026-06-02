@@ -7,7 +7,11 @@
   <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
+  
+  <!-- ================= LAYOUT PRINCIPAL ================= -->
   <div class="layout">
+    
+    <!-- ================= BARRA LATERAL (SIDEBAR) ================= -->
     <nav class="sidebar">
       <div class="sidebar-header js-company-name">Zyon ERP</div>
       <ul class="nav-list">
@@ -22,39 +26,48 @@
       </ul>
     </nav>
 
+    <!-- ================= ÁREA DE CONTEÚDO PRINCIPAL ================= -->
     <main class="main-content">
+      
+      <!-- BARRA SUPERIOR (Topbar) -->
       <header class="topbar">
         <span class="app-title js-company-name">Zyon ERP</span>
         <span id="clock"></span>
       </header>
 
-      <!-- CABEÇALHO: título + botão para voltar à página de cadastros -->
+      <!-- CABEÇALHO DA PÁGINA -->
       <div class="page-header">
         <h1>Novo Cliente</h1>
+        <!-- Botão para abortar e voltar pra tela anterior -->
         <button type="button" class="btn-secondary cancel-client-btn">Cancelar</button>
       </div>
 
-      <!-- FORMULÁRIO DE CADASTRO DE CLIENTE -->
+      <!-- ================= FORMULÁRIO DE CADASTRO ================= 
+           Nota: Apesar do sistema ter unificado "cadastros.html" para Vendedores e Fornecedores, 
+           a tela de cadastro de Clientes foi mantida separada (esta) devido ao histórico
+           e a complexidade de validações (Mascara de CPF vs CNPJ).
+      -->
       <div class="main-area">
         <form id="clientForm">
-          <!-- Aba informativa (única, apenas para manter o padrão visual) -->
+          
+          <!-- Aba visual apenas para mostrar onde o usuário está -->
           <div class="tabs">
             <button type="button" class="tab active">Dados Gerais</button>
           </div>
 
-          <!-- SELEÇÃO DO TIPO DE PESSOA: Física (PF) ou Jurídica (PJ) -->
+          <!-- SELEÇÃO: Pessoa Física (Mascara CPF) ou Jurídica (Mascara CNPJ) -->
           <div class="row">
             <label><input type="radio" name="tipoPessoa" value="pf" checked> Pessoa Física</label>
             <label><input type="radio" name="tipoPessoa" value="pj"> Pessoa Jurídica</label>
           </div>
 
-          <!-- Campo obrigatório: Nome ou Razão Social -->
+          <!-- CAMPO: Nome ou Razão Social -->
           <div class="form-group">
             <label for="nome">Nome / Razão Social *</label>
             <input id="nome" type="text" placeholder="Ex: João Silva">
           </div>
 
-          <!-- Linha com dois campos: CPF/CNPJ e Contato -->
+          <!-- CAMPOS EM LINHA (Flexbox): CPF/CNPJ e Email/Telefone -->
           <div class="row">
             <div class="form-group" style="flex:1;">
               <label for="documento">CPF / CNPJ *</label>
@@ -66,13 +79,15 @@
             </div>
           </div>
 
-          <!-- BOTÕES DE AÇÃO: cancelar (volta) ou salvar (envia formulário) -->
+          <!-- AÇÕES DO FORMULÁRIO -->
           <div class="modal-actions">
             <button type="button" class="btn-secondary cancel-client-btn">Cancelar</button>
             <button type="submit" class="btn-primary">Salvar Cliente</button>
           </div>
+          
         </form>
       </div>
+      
     </main>
   </div>
 

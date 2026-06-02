@@ -4,16 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Zyon ERP</title>
+  
+  <!-- Estilos Globais -->
   <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
-  <!-- LAYOUT PRINCIPAL: sidebar fixa à esquerda + conteúdo à direita -->
+  
+  <!-- ================= LAYOUT PRINCIPAL ================= 
+       A div .layout engloba tudo na tela. Usamos Flexbox para 
+       colocar a Sidebar fixa na esquerda e o Conteúdo na direita.
+  -->
   <div class="layout">
-    <!-- BARRA LATERAL DE NAVEGAÇÃO (sidebar) -->
+    
+    <!-- ================= BARRA LATERAL (SIDEBAR) ================= -->
     <nav class="sidebar">
-      <!-- Nome da empresa (preenchido dinamicamente via JS) -->
+      
+      <!-- Nome da empresa (Essa classe js-company-name fará o JavaScript trocar o texto dinamicamente) -->
       <div class="sidebar-header js-company-name">Zyon ERP</div>
-      <!-- Lista de links de navegação entre as páginas do sistema -->
+      
+      <!-- Menu de Navegação -->
       <ul class="nav-list">
         <li><a href="dashboard.html" class="active">📊 Dashboard</a></li>
         <li><a href="cadastros.html">📋 Cadastros</a></li>
@@ -22,48 +31,74 @@
         <li><a href="fiscal.html">📄 Fiscal</a></li>
         <li><a href="relatorios.html">📈 Relatórios</a></li>
         <li><a href="configuracoes.html">⚙️ Configurações</a></li>
-        <!-- Link com classe 'logout' para estilização diferenciada (vermelho) -->
+        
+        <!-- Botão de Sair (Classe 'logout' deixa ele vermelho) -->
         <li><a href="index.html" class="logout">🚪 Sair</a></li>
       </ul>
     </nav>
 
-    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <!-- ================= ÁREA DE CONTEÚDO PRINCIPAL ================= -->
     <main class="main-content">
-      <!-- BARRA SUPERIOR (topbar) com nome da empresa e relógio -->
+      
+      <!-- BARRA SUPERIOR (Topbar) -->
       <header class="topbar">
         <div>
+          <!-- Nome da Empresa de novo e um subtítulo -->
           <span class="app-title js-company-name">Zyon ERP</span>
           <p class="page-lead">Visão geral do dia e movimentações recentes.</p>
         </div>
+        <!-- Relógio em Tempo Real (Injetado pelo JS) -->
         <span id="clock" class="topbar-clock"></span>
       </header>
 
-      <!-- CARDS DE INDICADORES (KPIs) -->
+      <!-- ================= CARDS DE INDICADORES (KPIs) ================= 
+           Exibem resumos rápidos: Total de vendas do dia, ticket médio, etc.
+      -->
       <section class="kpi-cards">
-        <!-- Cada card exibe um indicador numérico com cor de borda específica -->
-        <div class="card card-blue"><h3>Vendas Hoje</h3><p id="kpiSalesToday">R$ 0,00</p></div>
-        <div class="card card-green"><h3>Ticket Médio</h3><p id="kpiTicket">R$ 0,00</p></div>
-        <div class="card card-yellow"><h3>Estoque Baixo</h3><p id="kpiLowStock">0 itens</p></div>
-        <div class="card card-purple"><h3>Clientes Ativos</h3><p id="kpiClients">0</p></div>
+        <div class="card card-blue">
+          <h3>Vendas Hoje</h3>
+          <p id="kpiSalesToday">R$ 0,00</p>
+        </div>
+        <div class="card card-green">
+          <h3>Ticket Médio</h3>
+          <p id="kpiTicket">R$ 0,00</p>
+        </div>
+        <div class="card card-yellow">
+          <h3>Estoque Baixo</h3>
+          <p id="kpiLowStock">0 itens</p>
+        </div>
+        <div class="card card-purple">
+          <h3>Clientes Ativos</h3>
+          <p id="kpiClients">0</p>
+        </div>
       </section>
 
-      <!-- TABELA DAS ÚLTIMAS VENDAS -->
+      <!-- ================= TABELA DE ÚLTIMAS VENDAS ================= -->
       <section class="table-section section-card">
         <div class="page-header">
           <h2>Últimas Vendas</h2>
         </div>
-        <!-- Tabela preenchida dinamicamente pelo JS (dashboard.js) -->
+        
+        <!-- O <tbody> desta tabela é preenchido pelo dashboard.js -->
         <table>
           <thead>
-            <tr><th>Cliente</th><th>Valor</th><th>Data</th></tr>
+            <tr>
+              <th>Cliente</th>
+              <th>Valor</th>
+              <th>Data</th>
+            </tr>
           </thead>
           <tbody id="latestSalesBody"></tbody>
         </table>
       </section>
+
     </main>
   </div>
 
-  <!-- Scripts JavaScript carregados no final para melhor performance -->
+  <!-- ================= CARREGAMENTO DOS SCRIPTS ================= 
+       Ordem importa: Primeiro a autenticação, depois o Core (app.js), 
+       Analytics e finalmente a lógica específica da Dashboard.
+  -->
   <script src="js/auth.js"></script>
   <script src="js/session.js"></script>
   <script src="js/app.js"></script>

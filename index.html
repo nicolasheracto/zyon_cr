@@ -1,44 +1,54 @@
 <!DOCTYPE html>
-<!-- Declaração do tipo HTML5 -->
 <html lang="pt-BR">
-<!-- Início do documento HTML com idioma português brasileiro -->
 <head>
-  <!-- Meta tags para codificação de caracteres e responsividade -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Título exibido na aba do navegador -->
   <title>Login - Zyon ERP</title>
-  <!-- Importação do arquivo de estilos CSS global -->
+  
+  <!-- Estilos Globais -->
   <link rel="stylesheet" href="style/style.css">
 </head>
-<!-- Classe 'login-page' aplica fundo escuro específico para tela de login -->
 <body class="login-page">
-  <!-- Container centralizado que limita a largura máxima do formulário -->
+
+  <!-- ================= CAIXA CENTRAL DE LOGIN ================= -->
   <div class="login-container">
-    <!-- Card branco com sombra que envolve o formulário de login -->
     <div class="login-card">
-      <!-- Logotipo da empresa -->
+      
+      <!-- Logotipo e Título -->
       <img src="img/logo.png" alt="Zyon ERP Logo" class="logo-img">
-      <!-- Título principal do sistema -->
       <h1>Zyon ERP</h1>
-      <!-- Indicador visual de status do servidor (sempre verde nessa versão local) -->
+      
+      <!-- Status do Servidor (Visual) -->
       <div class="server-status">
         <span class="status-indicator green"></span> Servidor Disponível
       </div>
+      
+      <!-- Divisão para exibição de erros (Fica oculta por padrão - hidden) -->
       <p id="loginError" class="login-error" role="alert" hidden></p>
+      
+      <!-- Formulário de Autenticação -->
       <form id="loginForm" novalidate>
+        
+        <!-- Campo: Usuário -->
         <div class="form-group">
           <label for="username">Usuário</label>
           <input type="text" id="username" name="username" autocomplete="username" required>
         </div>
+        
+        <!-- Campo: Senha -->
         <div class="form-group">
           <label for="password">Senha</label>
           <input type="password" id="password" name="password" autocomplete="current-password" required>
         </div>
+        
+        <!-- Botão de Acesso -->
         <button type="submit" class="btn-primary">Entrar</button>
       </form>
+
     </div>
   </div>
+
+  <!-- Scripts responsáveis por validar o login -->
   <script src="js/auth.js"></script>
   <script src="js/login.js"></script>
 </body>

@@ -4,10 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PDV - Zyon ERP</title>
+  
+  <!-- Estilos Globais -->
   <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
+
+  <!-- ================= LAYOUT PRINCIPAL ================= -->
   <div class="layout">
+    
+    <!-- ================= BARRA LATERAL (SIDEBAR) ================= -->
     <nav class="sidebar">
       <div class="sidebar-header js-company-name">Zyon ERP</div>
       <ul class="nav-list">
@@ -23,14 +29,20 @@
       </ul>
     </nav>
 
+    <!-- ================= ÁREA DE CONTEÚDO PRINCIPAL ================= -->
     <main class="main-content">
+      
+      <!-- BARRA SUPERIOR (Topbar) -->
       <header class="topbar">
         <span class="app-title">PDV - <span class="js-company-name">Zyon ERP</span></span>
         <span id="clock"></span>
       </header>
 
-      <!-- ÁREA PRINCIPAL DO PDV (Ponto de Venda) -->
+      <!-- ================= ÁREA PRINCIPAL DO PDV (Ponto de Venda) ================= 
+           Nesta tela ocorre o processo de vendas. É um "Carrinho de Compras" manual.
+      -->
       <div class="main-area">
+        
         <!-- SELEÇÃO DE VENDEDOR E CLIENTE -->
         <div class="row">
           <div class="form-group" style="flex: 1;">
@@ -49,6 +61,7 @@
         <div class="row">
           <div class="form-group" style="flex: 2;">
             <label for="productSelect">Produto</label>
+            <!-- Carrega os produtos direto do Estoque -->
             <select id="productSelect"></select>
           </div>
           <div class="form-group" style="flex: 1;">
@@ -60,7 +73,7 @@
           </div>
         </div>
 
-        <!-- TABELA DE ITENS ADICIONADOS À VENDA -->
+        <!-- ================= TABELA DE CARRINHO DE COMPRAS ================= -->
         <table id="items-table">
           <thead>
             <tr>
@@ -71,10 +84,11 @@
               <th style="width: 70px; text-align:center;">Ação</th>
             </tr>
           </thead>
+          <!-- js/vendas.js injeta os itens aqui (linhas com o botão vermelho de remover) -->
           <tbody id="items-body"></tbody>
         </table>
 
-        <!-- RESUMO DOS VALORES: subtotal, desconto, acréscimo e total -->
+        <!-- RESUMO FINANCEIRO (Totais da Venda Atual) -->
         <div class="summary">
           <div>Subtotal: <span id="subtotal">R$ 0,00</span></div>
           <div>Desconto: <span id="discount">R$ 0,00</span></div>
@@ -82,30 +96,36 @@
           <div class="total">TOTAL: <span id="total">R$ 0,00</span></div>
         </div>
 
-        <!-- BOTÕES DE AÇÃO DA VENDA -->
+        <!-- ================= BOTÕES DE AÇÃO DO PDV ================= -->
         <div class="action-buttons">
           <button id="applySurchargeBtn" class="btn-orange">✔ Acréscimo</button>
           <button id="applyDiscountBtn" class="btn-purple">💲 Desconto</button>
           <button id="cancelSaleBtn" class="btn-red">✖ Cancelar</button>
-          <!-- Botão verde ocupa duas colunas (grid-column: span 2) -->
+          <!-- Botão verde que aciona o Checkout de Pagamento (ocupa duas colunas no CSS) -->
           <button id="openCheckoutBtn" class="btn-green-full">🟢 Finalizar</button>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- MODAL DE CHECKOUT: exibido ao clicar em "Finalizar" -->
+  <!-- ================= MODAL DE CHECKOUT (PAGAMENTO) ================= 
+       Só aparece quando o usuário clica em "Finalizar" e a venda for maior que R$ 0,00.
+       Ele cobre a tela inteira (display flex vs none injetado pelo JS).
+  -->
   <div id="checkoutModal" class="modal checkout-modal">
     <div class="modal-content">
-      <!-- LADO ESQUERDO: painel escuro com total, formas de pagamento e botão finalizar -->
+      
+      <!-- LADO ESQUERDO: Painel escuro com total pendente e teclado de formas de pagamento -->
       <div class="checkout-left">
         <h2>Checkout</h2>
         <p>Cliente: <span id="modal-customer">Consumidor Final</span></p>
-        <!-- Caixa de destaque com o valor pendente de pagamento -->
+        
+        <!-- Caixa de destaque com o valor pendente de pagamento (Subtrai conforme paga) -->
         <div class="total-box">
           <span style="font-size: 1rem; display:block; color:#9ca3af;">Falta pagar</span>
           <span id="due-amount">R$ 0,00</span>
         </div>
+        
         <p style="margin-bottom: 10px;">Adicionar pagamento</p>
         <!-- Botões das formas de pagamento disponíveis -->
         <div class="payment-buttons">
@@ -114,20 +134,24 @@
           <button id="payDebitBtn">💳 Débito</button>
           <button id="payCreditBtn">💳 Crédito</button>
         </div>
+        
+        <!-- Botão Final que conclui o pedido (Gera a Venda, baixa estoque) -->
         <button id="finalizeSaleBtn" class="btn-primary" style="margin-top:auto; padding: 1.2rem; font-size:1.1rem;">Finalizar Venda</button>
       </div>
 
-      <!-- LADO DIREITO: painel branco com lista de itens e pagamentos lançados -->
+      <!-- LADO DIREITO: Resumo branco (O que o cliente está comprando + Extrato de Pagamento) -->
       <div class="checkout-right">
-        <!-- Botão X para fechar o modal -->
         <span id="closeModalBtn" class="close" style="float:right; cursor:pointer; font-size:1.5rem;">&times;</span>
-        <!-- Lista dos itens incluídos na venda -->
+        
         <h3 style="margin-bottom:1rem; color:var(--text-light); font-size: 0.9rem;">Itens da venda</h3>
+        <!-- Lista de itens injetada via JS -->
         <ul id="modal-item-list" style="list-style: none; margin-bottom: 2rem; color: var(--text-dark); border-bottom: 1px solid var(--border); padding-bottom: 1rem;"></ul>
-        <!-- Lista dos pagamentos já registrados -->
+        
         <h3 style="margin-bottom:1rem; color:var(--text-light); font-size: 0.9rem;">Pagamentos lançados</h3>
+        <!-- Lista de pagamentos (Ex: 50 no Cartão, 50 no PIX) -->
         <ul id="payment-list" style="list-style: none; margin-bottom: 1rem;"></ul>
-        <!-- Totais: valor pago e troco -->
+        
+        <!-- Painel Inferior: Troco e Total -->
         <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
           <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem; font-size: 1.1rem;">
             <span>Total Pago</span>
@@ -139,6 +163,7 @@
           </div>
         </div>
       </div>
+
     </div>
   </div>
 

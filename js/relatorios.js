@@ -1,220 +1,267 @@
-/* === RELATÓRIOS (relatorios.html) === */
+/* === MÓDULO DE RELATÓRIOS (relatorios.js) ===
+   - Responsável por ler os dados consolidados pelo Motor Analytics (ZyonAnalytics)
+   - Exibe estatísticas financeiras, operacionais e listagens em abas e painéis.
+*/
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Inicialização padrão: liga o relógio, branding e pega a referência global
   const app = window.ZyonApp.initPage();
-  const analytics = window.ZyonAnalytics;
-  const periodSelect = document.getElementById('reportPeriod');
-  const periodLabel = document.getElementById('reportPeriodLabel');
+  
+  // Pegamos o motor de Analytics que também foi carregado no HTML
+  const an = window.ZyonAnalytics;
+
+  // Seletores do DOM que vamos manipular com frequência
+  const periodSelect = document.getElementById('reportPeriod'); // Dropdown: Hoje, 7 Dias, Mês...
+  const periodLabel = document.getElementById('reportPeriodLabel'); // Texto indicando o período atual
+  
+  // As abas (faturamento, produtos, clientes, etc.) e seus respectivos painéis de conteúdo
   const tabs = document.querySelectorAll('.report-tab');
   const panels = document.querySelectorAll('.report-panel');
 
-  const periodLabels = {
-    all: 'todo o período',
-    today: 'hoje',
-    week: 'últimos 7 dias',
-    month: 'mês atual'
-  };
-
-  function statusBadge(status) {
-    const active = status === 'Ativo';
-    const cls = active ? 'status-active' : 'status-inactive';
-    return `<span class="status-badge ${cls}">${app.escapeHtml(status)}</span>`;
+  /**
+   * Função utilitária para renderizar rapidamente uma lista HTML (`<ul>`) de estatísticas 
+   * no formato "Chave: Valor" separados em lados opostos usando Flexbox.
+   * 
+   * @param {HTMLElement} ulElement - O elemento `<ul>` que vai receber os itens.
+   * @param {Array<{label: string, value: string}>} items - Lista de objetos contendo o rótulo e o valor a ser exibido.
+   * @returns {void} Não retorna nada, apenas manipula o DOM.
+   */
+  function renderStatList(ulElement, items) {
+    if (!ulElement) return;
+    ulElement.innerHTML = items.map((item) => `
+      <li>
+        <span>${app.escapeHtml(item.label)}</span>
+        <strong>${app.escapeHtml(item.value)}</strong>
+      </li>
+    `).join('');
   }
 
-  function renderStatList(el, items) {
-    if (!el) return;
-    el.innerHTML = items
-      .map(({ label, value }) => `<li><span>${app.escapeHtml(label)}</span><strong>${app.escapeHtml(value)}</strong></li>`)
-      .join('');
-  }
-
-  function pct(part, total) {
-    if (!total) return '0%';
-    return `${((part / total) * 100).toFixed(1)}%`;
-  }
-
+  /**
+   * Preenche todos os painéis e abas da tela de Relatórios com base no período de datas selecionado.
+   * É a função central desta tela, englobando a injeção de dados no HTML.
+   * 
+   * Fluxo:
+   * 1. Descobre qual é o período selecionado no Dropdown (Hoje, 7 Dias, etc).
+   * 2. Pede ao ZyonAnalytics para processar/mastigar todos os dados do banco dentro desse período.
+   * 3. Atualiza os "Cartões Coloridos" (KPIs) na parte superior.
+   * 4. Preenche as tabelas da Aba de Faturamento.
+   * 5. Preenche as tabelas da Aba de Produtos e Estoque.
+   * 6. Preenche as tabelas da Aba de Clientes.
+   * 7. Preenche as tabelas da Aba da Equipe (Vendedores).
+   * 8. Preenche as listas da Aba Operacional.
+   * 
+   * @returns {void}
+   */
   function refresh() {
     const period = periodSelect?.value || 'all';
-    const store = app.loadStore();
-    const report = analytics.buildReport(store, period);
-
-    if (periodLabel) {
-      periodLabel.textContent = `Exibindo: ${periodLabels[period] || period}`;
+    
+    // Atualiza o texto visual de qual período está ativo
+    if (periodLabel && periodSelect) {
+      periodLabel.textContent = `Exibindo: ${periodSelect.options[periodSelect.selectedIndex].text.toLowerCase()}`;
     }
 
-    const s = report.summary;
-    app.setText('reportRevenue', app.formatCurrency(s.revenue));
+    // 2. CHAMA O MOTOR DE ANÁLISE PASSANDO O PERÍODO
+    // s = Stats (Estatísticas prontas para uso)
+    const s = an.analyzeAll(period);
+
+    // ==========================================================
+    // 3. ATUALIZAR CARDS SUPERIORES (KPIs GERAIS)
+    // ==========================================================
+    app.setText('reportRevenue', app.formatCurrency(s.totalRevenue));
     app.setText('reportSalesCount', String(s.salesCount));
     app.setText('reportAverageTicket', app.formatCurrency(s.averageTicket));
     app.setText('reportStockValue', app.formatCurrency(s.stockValue));
-    app.setText('reportActiveClients', String(s.activeClients));
-    app.setText('reportLowStock', `${s.lowStockCount} itens`);
+    app.setText('reportActiveClients', String(s.clientsCount));
+    app.setText('reportLowStock', String(s.lowStockCount));
 
+    // ==========================================================
+    // 4. ABA FATURAMENTO
+    // ==========================================================
     renderStatList(document.getElementById('billingStats'), [
-      { label: 'Faturamento no período', value: app.formatCurrency(s.revenue) },
-      { label: 'Quantidade de vendas', value: String(s.salesCount) },
-      { label: 'Ticket médio', value: app.formatCurrency(s.averageTicket) },
-      { label: 'Faturamento hoje (geral)', value: app.formatCurrency(s.revenueToday) },
-      { label: 'Vendas hoje (geral)', value: String(s.salesTodayCount) }
+      { label: 'Receita Bruta', value: app.formatCurrency(s.totalRevenue) },
+      { label: 'Quantidade de Vendas', value: String(s.salesCount) },
+      { label: 'Ticket Médio', value: app.formatCurrency(s.averageTicket) },
+      { label: 'Descontos Concedidos', value: app.formatCurrency(s.totalDiscounts) },
+      { label: 'Acréscimos/Taxas', value: app.formatCurrency(s.totalSurcharges) }
     ]);
 
-    const paymentTotal = report.billing.paymentMethods.reduce((acc, p) => acc + p.total, 0);
+    // Tabela: Formas de Pagamento mais usadas
     app.renderTable(
       document.getElementById('paymentMethodsBody'),
-      report.billing.paymentMethods.map(
-        (p) => `<tr>
-          <td>${app.escapeHtml(p.method)}</td>
-          <td>${app.formatCurrency(p.total)}</td>
-          <td>${pct(p.total, paymentTotal)}</td>
-        </tr>`
-      ),
+      s.paymentsBreakdown.map((pm) => `
+        <tr>
+          <td>${app.escapeHtml(pm.method)}</td>
+          <td>${app.formatCurrency(pm.total)}</td>
+          <td>${pm.percentage}%</td>
+        </tr>
+      `),
       3,
       'Nenhum pagamento registrado no período.'
     );
 
+    // Tabela: Extrato Completo de Vendas (As últimas que ocorreram no período)
     app.renderTable(
       document.getElementById('periodSalesBody'),
-      report.billing.recentSales.map(
-        (sale) => `<tr>
-          <td>${app.escapeHtml(sale.date || '-')}</td>
-          <td>${app.escapeHtml(sale.customer || 'Consumidor Final')}</td>
-          <td>${app.escapeHtml(sale.seller || '-')}</td>
-          <td>${(sale.items || []).length}</td>
-          <td>${app.formatCurrency(sale.total || 0)}</td>
-        </tr>`
-      ),
+      s.filteredSales.map((sale) => `
+        <tr>
+          <td>${app.escapeHtml(sale.date)}</td>
+          <td>${app.escapeHtml(sale.customer)}</td>
+          <td>${app.escapeHtml(sale.seller)}</td>
+          <td>${(sale.items || []).reduce((acc, i) => acc + (i.qty || 1), 0)}</td>
+          <td><strong>${app.formatCurrency(sale.total)}</strong></td>
+        </tr>
+      `),
       5,
-      'Nenhuma venda no período selecionado.'
+      'Nenhuma venda neste período.'
     );
 
+    // ==========================================================
+    // 5. ABA PRODUTOS E ESTOQUE
+    // ==========================================================
+    
+    // Top Produtos (Por Volume Vendido)
     app.renderTable(
       document.getElementById('topProductsQtyBody'),
-      report.products.topByQty.map(
-        (p) => `<tr>
+      s.topProductsByQty.map((p) => `
+        <tr>
           <td>${app.escapeHtml(p.name)}</td>
           <td>${p.qty}</td>
           <td>${app.formatCurrency(p.revenue)}</td>
-        </tr>`
-      ),
+        </tr>
+      `),
       3,
-      'Sem movimentação de produtos no período.'
+      'Sem dados de vendas.'
     );
 
+    // Top Produtos (Por Receita Financeira)
     app.renderTable(
       document.getElementById('topProductsRevenueBody'),
-      report.products.topByRevenue.map(
-        (p) => `<tr>
+      s.topProductsByRevenue.map((p) => `
+        <tr>
           <td>${app.escapeHtml(p.name)}</td>
-          <td>${app.formatCurrency(p.revenue)}</td>
+          <td><strong>${app.formatCurrency(p.revenue)}</strong></td>
           <td>${p.qty}</td>
-        </tr>`
-      ),
+        </tr>
+      `),
       3,
-      'Sem receita por produto no período.'
+      'Sem dados de vendas.'
     );
 
+    // Tabela: Produtos que estão acabando (Abaixo da linha de corte de segurança)
     app.renderTable(
       document.getElementById('lowStockBody'),
-      report.products.lowStock.map(
-        (p) => `<tr>
-          <td>${app.escapeHtml(p.sku || '-')}</td>
+      s.lowStockProducts.map((p) => `
+        <tr>
+          <td>${app.escapeHtml(p.sku)}</td>
           <td>${app.escapeHtml(p.nome)}</td>
-          <td>${p.quantidade ?? 0}</td>
+          <td><strong style="color:var(--red)">${p.quantidade}</strong></td>
           <td>${app.formatCurrency(p.preco)}</td>
-        </tr>`
-      ),
+        </tr>
+      `),
       4,
       'Nenhum produto com estoque baixo.'
     );
 
+    // Tabela: Inventário total (Posição Atual do Estoque Geral)
     app.renderTable(
       document.getElementById('inventoryBody'),
-      report.products.inventory.map((p) => {
-        const lineTotal = (p.preco || 0) * (p.quantidade || 0);
-        return `<tr>
-          <td>${app.escapeHtml(p.sku || '-')}</td>
+      s.allProducts.map((p) => `
+        <tr>
+          <td>${app.escapeHtml(p.sku)}</td>
           <td>${app.escapeHtml(p.nome)}</td>
-          <td>${p.quantidade ?? 0}</td>
+          <td>${p.quantidade}</td>
           <td>${app.formatCurrency(p.preco)}</td>
-          <td>${app.formatCurrency(lineTotal)}</td>
-        </tr>`;
-      }),
+          <td>${app.formatCurrency((p.preco || 0) * (p.quantidade || 0))}</td>
+        </tr>
+      `),
       5,
-      'Nenhum produto cadastrado.'
+      'Nenhum produto cadastrado no catálogo.'
     );
 
+    // ==========================================================
+    // 6. ABA CLIENTES
+    // ==========================================================
     renderStatList(document.getElementById('clientsStats'), [
-      { label: 'Total cadastrados', value: String(s.clientsTotal) },
-      { label: 'Ativos', value: String(s.activeClients) },
-      { label: 'Inativos', value: String(s.inactiveClients) },
-      { label: 'Com compras no período', value: String(report.clients.topCustomers.length) }
+      { label: 'Total de clientes', value: String(s.clientsCount) },
+      { label: 'Clientes inativos', value: String(s.inactiveClients) },
+      { label: 'Pessoas Físicas (PF)', value: String(s.pfCount) },
+      { label: 'Pessoas Jurídicas (PJ)', value: String(s.pjCount) }
     ]);
 
+    // Top Clientes que mais gastaram dinheiro
     app.renderTable(
       document.getElementById('topCustomersBody'),
-      report.clients.topCustomers.map(
-        (c) => `<tr>
+      s.topCustomers.map((c) => `
+        <tr>
           <td>${app.escapeHtml(c.name)}</td>
-          <td>${c.purchases}</td>
-          <td>${app.formatCurrency(c.revenue)}</td>
-        </tr>`
-      ),
+          <td>${c.count}</td>
+          <td><strong>${app.formatCurrency(c.total)}</strong></td>
+        </tr>
+      `),
       3,
-      'Nenhum cliente com compras no período.'
+      'Sem vendas associadas a clientes neste período.'
     );
 
+    // Lista crua de todos os clientes cadastrados
     app.renderTable(
       document.getElementById('clientsListBody'),
-      report.clients.registered.map(
-        (c) => `<tr>
+      s.allClients.map((c) => `
+        <tr>
           <td>${app.escapeHtml(c.nome)}</td>
-          <td>${app.escapeHtml(c.documento || '-')}</td>
+          <td>${app.escapeHtml(c.documento)}</td>
           <td>${app.escapeHtml(c.contato || '-')}</td>
-          <td>${statusBadge(c.status)}</td>
-        </tr>`
-      ),
+          <td>${app.escapeHtml(c.status)}</td>
+        </tr>
+      `),
       4,
       'Nenhum cliente cadastrado.'
     );
 
+    // ==========================================================
+    // 7. ABA EQUIPE (Vendedores)
+    // ==========================================================
+    
+    // Performance: Quem vendeu mais
     app.renderTable(
       document.getElementById('sellersPerformanceBody'),
-      report.team.sellers.map(
-        (v) => `<tr>
-          <td>${app.escapeHtml(v.name)}</td>
-          <td>${v.sales}</td>
-          <td>${app.formatCurrency(v.revenue)}</td>
-        </tr>`
-      ),
+      s.topSellers.map((slr) => `
+        <tr>
+          <td>${app.escapeHtml(slr.name)}</td>
+          <td>${slr.count}</td>
+          <td><strong>${app.formatCurrency(slr.total)}</strong></td>
+        </tr>
+      `),
       3,
-      'Nenhuma venda por vendedor no período.'
+      'Sem vendas associadas a vendedores.'
     );
 
+    // Lista crua dos vendedores e suas comissões
     app.renderTable(
       document.getElementById('sellersListBody'),
-      report.team.registered.map(
-        (v) => `<tr>
-          <td>${app.escapeHtml(v.nome)}</td>
-          <td>${v.comissao != null ? `${v.comissao}%` : '-'}</td>
-          <td>${statusBadge(v.status)}</td>
-        </tr>`
-      ),
+      s.allSellers.map((slr) => `
+        <tr>
+          <td>${app.escapeHtml(slr.nome)}</td>
+          <td>${slr.comissao}%</td>
+          <td>${app.escapeHtml(slr.status)}</td>
+        </tr>
+      `),
       3,
       'Nenhum vendedor cadastrado.'
     );
 
-    const ops = report.operations;
+    // ==========================================================
+    // 8. ABA OPERACIONAL (Fornecedores e Resumo)
+    // ==========================================================
     renderStatList(document.getElementById('opsStats'), [
-      { label: 'NF-e autorizadas', value: String(report.summary.fiscalNotesAuthorized ?? ops.fiscalNotesTotal) },
-      { label: 'NF-e canceladas', value: String(report.summary.fiscalNotesCancelled ?? 0) },
-      { label: 'Pedidos de reposição', value: String(ops.stockOrdersTotal) },
-      { label: 'Pedidos pendentes', value: String(ops.pendingStockOrders) },
-      { label: 'Produtos em estoque baixo', value: String(s.lowStockCount) }
+      { label: 'Pedidos de Reposição', value: String(s.ordersTotal) },
+      { label: 'Pedidos Pendentes', value: String(s.ordersPending) },
+      { label: 'Pedidos Concluídos', value: String(s.ordersCompleted) },
+      { label: 'Gasto com Pedidos', value: app.formatCurrency(s.ordersValue) }
     ]);
 
     renderStatList(document.getElementById('suppliersStats'), [
-      { label: 'Fornecedores cadastrados', value: String(s.suppliersTotal) },
-      { label: 'Fornecedores ativos', value: String(ops.suppliersActive) }
+      { label: 'Total Fornecedores', value: String(s.suppliersTotal) },
+      { label: 'Fornecedores Ativos', value: String(s.suppliersActive) }
     ]);
 
     renderStatList(document.getElementById('opsReference'), [
@@ -224,10 +271,19 @@ document.addEventListener('DOMContentLoaded', () => {
     ]);
   }
 
+  // ============================================================================
+  // EVENT LISTENERS E CONTROLE DAS ABAS
+  // ============================================================================
+  
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
+      // Pega o nome do painel que deve ser exibido pelo dataset (data-tab="faturamento")
       const target = tab.dataset.tab;
+      
+      // Toggle de ativação visual das Abas (CSS)
       tabs.forEach((t) => t.classList.toggle('active', t === tab));
+      
+      // Oculta todos os painéis e mostra apenas o correto
       panels.forEach((panel) => {
         const isActive = panel.dataset.panel === target;
         panel.classList.toggle('active', isActive);
@@ -236,6 +292,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Re-renderiza tudo se o usuário mudar o Filtro de Tempo (Dropdown)
   periodSelect?.addEventListener('change', refresh);
+  
+  // Executa o preenchimento logo ao abrir a tela usando o valor padrão (Todo o período)
   refresh();
 });
